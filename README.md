@@ -5,17 +5,15 @@
 [![hxcpp](https://github.com/hx-n/hxn-gpu-vulkan/actions/workflows/hxcpp.yml/badge.svg)](https://github.com/hx-n/hxn-gpu-vulkan/actions/workflows/hxcpp.yml)
 [![CPPIA](https://github.com/hx-n/hxn-gpu-vulkan/actions/workflows/cppia.yml/badge.svg)](https://github.com/hx-n/hxn-gpu-vulkan/actions/workflows/cppia.yml)
 
-Vulkan for Haxe on Ash, HashLink, hxcpp and CPPIA, on Linux, Windows, Android
-and macOS (through MoltenVK). It keeps Vulkan's own conventions: an instance
-finds the GPUs, a device makes buffers, images, descriptor sets and
-pipelines, and command buffers record work that a program submits.
-Synchronization is explicit: the program records the barriers and image
-layout transitions its commands need, as in Vulkan.
+Vulkan bindings for Haxe on Ash, HashLink, hxcpp and CPPIA, on Linux,
+Windows, Android and macOS (through MoltenVK). The API follows Vulkan:
+`Instance`, `Device`, buffers, images, descriptor sets, pipelines and command
+buffers. Synchronization is explicit: you record the barriers and image
+layout transitions your commands need.
 
 Shaders come from [hxnsl](https://github.com/hx-n/hxnsl), which compiles HXSL
-to SPIR-V at compile time. hxnsl's bind groups are the descriptor sets,
-and its `LAYOUT` gives their layouts, so nothing reflects on a shader at run
-time.
+to SPIR-V at compile time. hxnsl's bind groups are the descriptor sets, and
+`LAYOUT` gives their layouts, so no shader reflection happens at run time.
 
 ```haxe
 import gpu.vulkan.*;
