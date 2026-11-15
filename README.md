@@ -13,7 +13,7 @@ Synchronization is explicit: the program records the barriers and image
 layout transitions its commands need, as in Vulkan.
 
 Shaders come from [hxnsl](https://github.com/hx-n/hxnsl), which compiles HXSL
-to SPIR-V during the Haxe build. hxnsl's bind groups are the descriptor sets,
+to SPIR-V at compile time. hxnsl's bind groups are the descriptor sets,
 and its `LAYOUT` gives their layouts, so nothing reflects on a shader at run
 time.
 
