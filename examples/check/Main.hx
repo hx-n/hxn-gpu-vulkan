@@ -47,7 +47,7 @@ class Main {
 		var module = device.createShaderModule(Tripled.spirv());
 		var sets = gpu.vulkan.Shaders.setLayouts(device, Tripled.LAYOUT);
 		var layout = device.createPipelineLayout(sets);
-		var pipeline = device.createComputePipeline(module, "main", layout);
+		var pipeline = device.createComputePipeline(module, "compute_main", layout);
 		var count = 64;
 		var input = Bytes.alloc(count * 4);
 		for (i in 0...count)
@@ -79,7 +79,7 @@ class Main {
 		var module = device.createShaderModule(Tinted.spirv());
 		var sets = gpu.vulkan.Shaders.setLayouts(device, Tinted.LAYOUT);
 		var layout = device.createPipelineLayout(sets);
-		var pipeline = device.createGraphicsPipeline(module, "vertex", module, "fragment", layout, Format.Rgba8Unorm, Topology.TriangleStrip,
+		var pipeline = device.createGraphicsPipeline(module, "vertex_main", module, "fragment_main", layout, Format.Rgba8Unorm, Topology.TriangleStrip,
 			[{binding: 0, stride: 8, perInstance: false}], [{location: Tinted.INPUT_position, binding: 0, format: Format.Rg32Float, offset: 0}]);
 		var size = 4;
 		var target = device.createImage({

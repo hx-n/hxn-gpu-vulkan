@@ -23,7 +23,8 @@ not found).
 ## Use
 
 Shaders are hxnsl classes implementing `gpu.vulkan.Shader`; they get
-`spirv()` and `LAYOUT`. Entry points are `vertex`, `fragment` and `main`.
+`spirv()` and `LAYOUT`. Entry points are `vertex_main`, `fragment_main` and
+`compute_main`.
 
 ```haxe
 import gpu.vulkan.*;
@@ -33,7 +34,7 @@ var device = instance.createDevice(0);                 // instance.adapterNames(
 var module = device.createShaderModule(Tripled.spirv());
 var sets = gpu.vulkan.Shaders.setLayouts(device, Tripled.LAYOUT);  // one per bind group
 var layout = device.createPipelineLayout(sets);
-var pipeline = device.createComputePipeline(module, "main", layout);
+var pipeline = device.createComputePipeline(module, "compute_main", layout);
 var data = device.createBufferWith(bytes, BufferUsage.Storage);
 var set = device.createDescriptorSet(sets, Tripled.BUFFER_data_GROUP);
 set.writeBuffer(Tripled.BUFFER_data, data, 0, bytes.length);
@@ -80,8 +81,6 @@ commands.bufferBarrier(readback, Stage.Transfer, Access.TransferWrite, Stage.Hos
   Keep resources alive until the submission using them has finished.
 - `submit`'s future delivers through `hxn.Loop`; a custom frame loop sets
   `hxn.Loop.manual = true` and calls `hxn.Loop.sync()` each frame.
-- On MoltenVK, render pipelines with entry points named `vertex` and
-  `fragment` do not compile; compute does.
 
 ## Reference
 

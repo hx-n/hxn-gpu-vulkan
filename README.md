@@ -25,7 +25,7 @@ var device = instance.createDevice(0);
 var module = device.createShaderModule(Tripled.spirv());          // an hxnsl shader
 var sets = gpu.vulkan.Shaders.setLayouts(device, Tripled.LAYOUT);
 var layout = device.createPipelineLayout(sets);
-var pipeline = device.createComputePipeline(module, "main", layout);
+var pipeline = device.createComputePipeline(module, "compute_main", layout);
 var data = device.createBufferWith(input, BufferUsage.Storage);
 var set = device.createDescriptorSet(sets, Tripled.BUFFER_data_GROUP);
 set.writeBuffer(Tripled.BUFFER_data, data, 0, input.length);
@@ -92,16 +92,12 @@ buffer is kept until then. `submitAndWait` is the blocking form.
 
 A shader for this driver implements `gpu.vulkan.Shader`, which extends
 `hxnsl.Shader` and gets hxnsl's `spirv()` and `LAYOUT`. SPIR-V's entry points
-keep hxnsl's names: `vertex`, `fragment` and `main`.
+keep hxnsl's names: `vertex_main`, `fragment_main` and `compute_main`.
 `gpu.vulkan.Shaders.setLayouts(device, Shader.LAYOUT)` makes the descriptor
 set layouts of its bind groups.
 
 russl, which writes the SPIR-V, flips Y in the vertex stage, so images come
 out the way WebGPU draws them with an ordinary viewport.
-
-On MoltenVK, a render pipeline whose entry points are named `vertex` and
-`fragment` fails to compile: MoltenVK turns SPIR-V into MSL, where both names
-are reserved. Compute pipelines run.
 
 ## Building from source
 
