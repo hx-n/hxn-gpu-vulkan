@@ -1,0 +1,96 @@
+name: setup
+description: Rust, Haxe, the hxn command at the revision Cargo.toml pins, and a runtime.
+
+inputs:
+  runtime:
+    description: hl (stock HashLink), ash, cpp, cppia, or package (what `hxn package` needs)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: nightly-2026-08-25
+    - uses: Swatinem/rust-cache@v2
+    # setup-haxe has no Haxe for arm64 macOS, which Homebrew has.
+    - if: runner.os == 'Windows' || (runner.os == 'Linux' && runner.arch != 'ARM64')
+      uses: krdlab/setup-haxe@v1
+      with:
+        haxe-version: 4.3.6
+    - if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        brew install haxe
+        mkdir -p "$HOME/haxelib" && haxelib setup "$HOME/haxelib"
+    # setup-haxe has no Linux ARM64 build; Ubuntu packages one.
+    - if: runner.os == 'Linux' && runner.arch == 'ARM64'
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y haxe
+        mkdir -p "$HOME/haxelib" && haxelib setup "$HOME/haxelib"
+    # From git, at a commit after HaxeFoundation/hxcpp#1298: 4.3.2 can crash
+    # on Windows when a program exits right after a collection.
+    - if: inputs.runtime == 'cpp' || inputs.runtime == 'cppia'
+      shell: bash
+      run: |
+        haxelib git hxcpp https://github.com/HaxeFoundation/hxcpp --quiet
+        dir="$(haxelib libpath hxcpp)"
+        git -C "$dir" checkout -q 615adc73d5ef28f3f74ea47977c39c4f25ce256d
+        (cd "$dir/tools/hxcpp" && haxe compile.hxml)
+    - if: inputs.runtime == 'hl' && runner.os == 'Linux'
+      shell: bash
+      run: |
+        git clone --depth 1 --branch 1.15 https://github.com/HaxeFoundation/hashlink "$RUNNER_TEMP/hashlink"
+        make -C "$RUNNER_TEMP/hashlink" libhl hl
+        echo "$RUNNER_TEMP/hashlink" >> "$GITHUB_PATH"
+        echo "LD_LIBRARY_PATH=$RUNNER_TEMP/hashlink" >> "$GITHUB_ENV"
+    # The HashLink library links against the VM's libhl.lib on Windows, for
+    # Ash too, which loads it through its own libhl.dll.
+    - if: (inputs.runtime == 'hl' || inputs.runtime == 'ash' || inputs.runtime == 'package') && runner.os == 'Windows'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        temp="$(cygpath -u "$RUNNER_TEMP")"
+        gh release download 1.15 --repo HaxeFoundation/hashlink --pattern '*-win.zip' --dir "$temp"
+        unzip -q "$temp"/*-win.zip -d "$temp/hl"
+        dir="$(dirname "$(find "$temp/hl" -name hl.exe | head -1)")"
+        cygpath -w "$dir" >> "$GITHUB_PATH"
+        # Where hxn finds libhl.lib, whichever VM runs the program.
+        echo "HXN_HL_DIR=$(cygpath -w "$dir")" >> "$GITHUB_ENV"
+    - if: inputs.runtime == 'ash'
+      shell: bash
+      run: |
+        case "$RUNNER_OS" in
+          Linux) archive=ash-linux-$([ "$RUNNER_ARCH" = ARM64 ] && echo aarch64 || echo x86_64).tar.gz ;;
+          macOS) archive=ash-macos-aarch64.tar.gz ;;
+          Windows) archive=ash-windows-x86_64.tar.gz ;;
+        esac
+        mkdir -p "$RUNNER_TEMP/ash"
+        # Extracted in place: tar reads a Windows path's drive as a host.
+        (cd "$RUNNER_TEMP/ash" && curl -fsSL "https://github.com/rayzor-blade/ash/releases/download/v0.1.18/$archive" | tar -xz)
+        if [ "$RUNNER_OS" = Windows ]; then
+          cygpath -w "$RUNNER_TEMP/ash" >> "$GITHUB_PATH"
+        else
+          echo "$RUNNER_TEMP/ash" >> "$GITHUB_PATH"
+        fi
+    # The command of the hxn release the crate depends on, since the two must
+    # match.
+    - shell: bash
+      run: |
+        tag="$(sed -n 's|^hxn = { git = "https://github.com/hx-n/hxn.git", tag = "\(v[0-9.]*\)" }|\1|p' Cargo.toml)"
+        test -n "$tag"
+        cargo install --git https://github.com/hx-n/hxn.git --tag "$tag" --locked hxn-cli
+        hxn version
+    # The Vulkan loader, lavapipe (Mesa's software Vulkan driver, since the runners have
+    # no GPU) and the Khronos validation layer.
+    - if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libvulkan1 mesa-vulkan-drivers vulkan-validationlayers
+    # hxnsl, which writes the check's shaders, with its tool prebuilt.
+    - shell: bash
+      run: haxelib install hxnsl --always

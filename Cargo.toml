@@ -1,0 +1,29 @@
+[package]
+name = "hxn-gpu-vulkan"
+version = "0.1.0"
+edition = "2024"
+description = "Vulkan for Haxe: devices, buffers, images, descriptor sets, pipelines and command buffers with explicit barriers"
+repository = "https://github.com/hx-n/hxn-gpu-vulkan"
+license = "Apache-2.0"
+keywords = ["vulkan", "gpu", "haxe", "graphics", "compute", "spirv", "linux", "windows", "android", "native"]
+
+[lib]
+name = "hxn_gpu_vulkan"
+
+[package.metadata.hxn]
+# The native library is `gpu_vulkan.hdll` or `libgpu_vulkan.a`.
+library = "gpu_vulkan"
+haxelib = "hxn-gpu-vulkan"
+contributors = ["darmie", "rayzor"]
+releasenote = "First release: instances and devices, buffers and images, descriptor sets, compute and graphics pipelines from SPIR-V, command buffers with explicit barriers, and dynamic rendering."
+# The check `hxn check` and `hxn run` build.
+haxe = "examples/check"
+haxe-flags = ["-lib", "hxnsl"]
+# Registers hxnsl's SPIR-V target for gpu.vulkan.Shader, from sources/.
+init = ["gpu.vulkan.Shaders.register()"]
+
+[dependencies]
+hxn = { git = "https://github.com/hx-n/hxn.git", tag = "v0.3.2" }
+hxn-future = { git = "https://github.com/hx-n/hxn.git", tag = "v0.3.2" }
+# Loads the Vulkan loader at run time, so the library links against no Vulkan SDK.
+ash = { version = "0.38", default-features = false, features = ["loaded", "std", "debug"] }

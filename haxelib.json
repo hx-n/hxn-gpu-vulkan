@@ -1,0 +1,11 @@
+{
+  "name": "hxn-gpu-vulkan",
+  "version": "0.1.0",
+  "description": "Vulkan for Haxe: devices, buffers, images, descriptor sets, pipelines and command buffers with explicit barriers",
+  "url": "https://github.com/hx-n/hxn-gpu-vulkan",
+  "license": "Apache",
+  "tags": ["vulkan", "gpu", "haxe", "graphics", "compute", "spirv", "linux", "windows", "android", "native"],
+  "contributors": ["darmie", "rayzor"],
+  "releasenote": "First release: instances and devices, buffers and images, descriptor sets, compute and graphics pipelines from SPIR-V, command buffers with explicit barriers, and dynamic rendering.",
+  "dependencies": { "hxn": "0.3.2" }
+}

@@ -1,0 +1,40 @@
+name: HashLink
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  check:
+    name: HashLink, ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        # HashLink's JIT runs on x86 alone.
+        os: [ubuntu-latest]
+    env:
+      # Every Vulkan call is checked; an error it reports fails the run below.
+      VK_INSTANCE_LAYERS: VK_LAYER_KHRONOS_validation
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          runtime: hl
+      # Fails without a Vulkan device, rather than passing on the line the check prints
+      # without one, and on any error the validation layer reports.
+      - run: |
+          hxn check hl 2>&1 | tee check.txt
+          grep -q '^compute: 64 values' check.txt
+          grep -q '^render: 4x4 pixels' check.txt
+          ! grep -q 'Validation Error' check.txt

@@ -1,0 +1,489 @@
+{
+  "hxn": 1,
+  "library": "gpu_vulkan",
+  "package": "gpu.vulkan",
+  "enums": [
+    {
+      "name": "Format",
+      "docs": "The formats an image or vertex attribute can have, with Vulkan's values.",
+      "variants": [{ "name": "R8Unorm", "value": 9 }, { "name": "Rgba8Unorm", "value": 37 }, { "name": "Rgba8Srgb", "value": 43 }, { "name": "Bgra8Unorm", "value": 44 }, { "name": "Bgra8Srgb", "value": 50 }, { "name": "Rgba16Float", "value": 97 }, { "name": "R32Uint", "value": 98 }, { "name": "R32Sint", "value": 99 }, { "name": "R32Float", "value": 100 }, { "name": "Rg32Float", "value": 103 }, { "name": "Rgb32Float", "value": 106 }, { "name": "Rgba32Float", "value": 109 }, { "name": "D32Float", "value": 126 }]
+    },
+    {
+      "name": "BufferUsage",
+      "docs": "`Device.createBuffer` usage bits, Vulkan's values.",
+      "variants": [{ "name": "TransferSrc", "value": 1 }, { "name": "TransferDst", "value": 2 }, { "name": "Uniform", "value": 16 }, { "name": "Storage", "value": 32 }, { "name": "Index", "value": 64 }, { "name": "Vertex", "value": 128 }]
+    },
+    {
+      "name": "ImageUsage",
+      "docs": "`ImageDescriptor.usage` bits, Vulkan's values.",
+      "variants": [{ "name": "TransferSrc", "value": 1 }, { "name": "TransferDst", "value": 2 }, { "name": "Sampled", "value": 4 }, { "name": "Storage", "value": 8 }, { "name": "ColorAttachment", "value": 16 }, { "name": "DepthAttachment", "value": 32 }]
+    },
+    {
+      "name": "Layout",
+      "docs": "An image layout, Vulkan's values.",
+      "variants": [{ "name": "Undefined", "value": 0 }, { "name": "General", "value": 1 }, { "name": "ColorAttachment", "value": 2 }, { "name": "DepthAttachment", "value": 3 }, { "name": "ShaderReadOnly", "value": 5 }, { "name": "TransferSrc", "value": 6 }, { "name": "TransferDst", "value": 7 }, { "name": "Present", "value": 1000001002 }]
+    },
+    {
+      "name": "Stage",
+      "docs": "Pipeline stage bits for a barrier, Vulkan's values, or-ed together.",
+      "variants": [{ "name": "TopOfPipe", "value": 1 }, { "name": "DrawIndirect", "value": 2 }, { "name": "VertexInput", "value": 4 }, { "name": "VertexShader", "value": 8 }, { "name": "FragmentShader", "value": 128 }, { "name": "EarlyFragmentTests", "value": 256 }, { "name": "LateFragmentTests", "value": 512 }, { "name": "ColorAttachmentOutput", "value": 1024 }, { "name": "ComputeShader", "value": 2048 }, { "name": "Transfer", "value": 4096 }, { "name": "BottomOfPipe", "value": 8192 }, { "name": "Host", "value": 16384 }, { "name": "AllGraphics", "value": 32768 }, { "name": "AllCommands", "value": 65536 }]
+    },
+    {
+      "name": "Access",
+      "docs": "Memory access bits for a barrier, Vulkan's values, or-ed together.",
+      "variants": [{ "name": "IndirectCommandRead", "value": 1 }, { "name": "IndexRead", "value": 2 }, { "name": "VertexAttributeRead", "value": 4 }, { "name": "UniformRead", "value": 8 }, { "name": "ShaderRead", "value": 32 }, { "name": "ShaderWrite", "value": 64 }, { "name": "ColorAttachmentRead", "value": 128 }, { "name": "ColorAttachmentWrite", "value": 256 }, { "name": "DepthAttachmentRead", "value": 512 }, { "name": "DepthAttachmentWrite", "value": 1024 }, { "name": "TransferRead", "value": 2048 }, { "name": "TransferWrite", "value": 4096 }, { "name": "HostRead", "value": 8192 }, { "name": "HostWrite", "value": 16384 }, { "name": "MemoryRead", "value": 32768 }, { "name": "MemoryWrite", "value": 65536 }]
+    },
+    {
+      "name": "DescriptorType",
+      "docs": "A descriptor's type, Vulkan's values.",
+      "variants": [{ "name": "Sampler", "value": 0 }, { "name": "CombinedImageSampler", "value": 1 }, { "name": "SampledImage", "value": 2 }, { "name": "StorageImage", "value": 3 }, { "name": "UniformBuffer", "value": 6 }, { "name": "StorageBuffer", "value": 7 }]
+    },
+    {
+      "name": "ShaderStage",
+      "docs": "Shader stage bits, Vulkan's values, or-ed together.",
+      "variants": [{ "name": "Vertex", "value": 1 }, { "name": "Fragment", "value": 16 }, { "name": "Compute", "value": 32 }]
+    },
+    {
+      "name": "Topology",
+      "variants": [{ "name": "PointList", "value": 0 }, { "name": "LineList", "value": 1 }, { "name": "LineStrip", "value": 2 }, { "name": "TriangleList", "value": 3 }, { "name": "TriangleStrip", "value": 4 }]
+    },
+    {
+      "name": "LoadOp",
+      "variants": [{ "name": "Load", "value": 0 }, { "name": "Clear", "value": 1 }, { "name": "DontCare", "value": 2 }]
+    },
+    {
+      "name": "BindPoint",
+      "variants": [{ "name": "Graphics", "value": 0 }, { "name": "Compute", "value": 1 }]
+    },
+    {
+      "name": "Filter",
+      "variants": [{ "name": "Nearest", "value": 0 }, { "name": "Linear", "value": 1 }]
+    },
+    {
+      "name": "AddressMode",
+      "variants": [{ "name": "Repeat", "value": 0 }, { "name": "MirroredRepeat", "value": 1 }, { "name": "ClampToEdge", "value": 2 }]
+    }
+  ],
+  "records": [
+    {
+      "name": "ImageDescriptor",
+      "fields": [
+        { "name": "width", "type": "i32" },
+        { "name": "height", "type": "i32" },
+        { "name": "format", "type": "Format" },
+        { "name": "usage", "type": "i32" }
+      ]
+    },
+    {
+      "name": "LayoutBinding",
+      "docs": "One binding of a descriptor set layout.",
+      "fields": [
+        { "name": "binding", "type": "i32" },
+        { "name": "kind", "type": "DescriptorType" },
+        { "name": "stages", "type": "i32" }
+      ]
+    },
+    {
+      "name": "SetLayout",
+      "docs": "One descriptor set's bindings: one of hxnsl's bind groups.",
+      "fields": [
+        { "name": "bindings", "type": "list<LayoutBinding>" }
+      ]
+    },
+    {
+      "name": "VertexAttribute",
+      "docs": "One vertex attribute: `location` is the shader's (hxnsl's `INPUT_<name>`).",
+      "fields": [
+        { "name": "location", "type": "i32" },
+        { "name": "binding", "type": "i32" },
+        { "name": "format", "type": "Format" },
+        { "name": "offset", "type": "i32" }
+      ]
+    },
+    {
+      "name": "VertexBinding",
+      "docs": "One vertex buffer binding: its stride in bytes, and whether it advances per instance.",
+      "fields": [
+        { "name": "binding", "type": "i32" },
+        { "name": "stride", "type": "i32" },
+        { "name": "per_instance", "type": "bool" }
+      ]
+    }
+  ],
+  "interfaces": [
+    {
+      "name": "Instance",
+      "docs": "A Vulkan instance: the loader, and the GPUs it finds.",
+      "methods": [
+        {
+          "name": "create",
+          "docs": "An instance for the application `name`. Fails where no Vulkan loader or driver is\ninstalled. Asks for Vulkan 1.3, which the driver may lower.",
+          "kind": "static",
+          "params": [{ "name": "name", "type": "str" }],
+          "returns": "Instance",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "adapter_names",
+          "docs": "The name of each GPU, in the order `createDevice` takes them.",
+          "kind": "method",
+          "params": [],
+          "returns": "list<str>",
+          "fallible": false,
+          "blocking": false
+        },
+        {
+          "name": "create_device",
+          "docs": "A device on GPU `index`, with one queue that does graphics and compute. Fails if the\nGPU lacks dynamic rendering or synchronization2.",
+          "kind": "method",
+          "params": [{ "name": "index", "type": "i32" }],
+          "returns": "Device",
+          "fallible": true,
+          "blocking": false
+        }
+      ]
+    },
+    {
+      "name": "Device",
+      "docs": "A logical device and its queue; every other object comes from one.",
+      "methods": [
+        {
+          "name": "create_buffer",
+          "docs": "A buffer of `size` bytes in memory the CPU can map, zeroed, with `usage` bits.",
+          "kind": "method",
+          "params": [{ "name": "size", "type": "i64" }, { "name": "usage", "type": "i32" }],
+          "returns": "Buffer",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "create_buffer_with",
+          "docs": "A buffer holding a copy of `bytes`.",
+          "kind": "method",
+          "params": [{ "name": "bytes", "type": "bytes" }, { "name": "usage", "type": "i32" }],
+          "returns": "Buffer",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "create_image",
+          "docs": "A 2D image in device memory, in the undefined layout, with one view of all of it.",
+          "kind": "method",
+          "params": [{ "name": "descriptor", "type": "ImageDescriptor" }],
+          "returns": "Image",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "create_sampler",
+          "kind": "method",
+          "params": [{ "name": "min", "type": "Filter" }, { "name": "mag", "type": "Filter" }, { "name": "address", "type": "AddressMode" }],
+          "returns": "Sampler",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "create_shader_module",
+          "docs": "A shader module from SPIR-V: hxnsl's `spirv()`.",
+          "kind": "method",
+          "params": [{ "name": "spirv", "type": "bytes" }],
+          "returns": "ShaderModule",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "create_set_layouts",
+          "docs": "The descriptor set layouts of a pipeline, set 0 first: one per hxnsl bind group.",
+          "kind": "method",
+          "params": [{ "name": "sets", "type": "list<SetLayout>" }],
+          "returns": "SetLayouts",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "create_pipeline_layout",
+          "docs": "A pipeline layout of all of `sets`.",
+          "kind": "method",
+          "params": [{ "name": "sets", "type": "SetLayouts" }],
+          "returns": "PipelineLayout",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "create_descriptor_set",
+          "docs": "A descriptor set of set `index` of `sets`, from a pool of its own.",
+          "kind": "method",
+          "params": [{ "name": "sets", "type": "SetLayouts" }, { "name": "index", "type": "i32" }],
+          "returns": "DescriptorSet",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "create_compute_pipeline",
+          "docs": "A compute pipeline running `entry` of `module`: hxnsl's entry point names (`main`).",
+          "kind": "method",
+          "params": [{ "name": "module", "type": "ShaderModule" }, { "name": "entry", "type": "str" }, { "name": "layout", "type": "PipelineLayout" }],
+          "returns": "Pipeline",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "create_graphics_pipeline",
+          "docs": "A graphics pipeline for dynamic rendering into one color attachment of `format`, with a\ndynamic viewport and scissor, no blending and no culling.",
+          "kind": "method",
+          "params": [{ "name": "vertex", "type": "ShaderModule" }, { "name": "vertex_entry", "type": "str" }, { "name": "fragment", "type": "ShaderModule" }, { "name": "fragment_entry", "type": "str" }, { "name": "layout", "type": "PipelineLayout" }, { "name": "format", "type": "Format" }, { "name": "topology", "type": "Topology" }, { "name": "bindings", "type": "list<VertexBinding>" }, { "name": "attributes", "type": "list<VertexAttribute>" }],
+          "returns": "Pipeline",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "create_command_buffer",
+          "docs": "A primary command buffer, from a pool of its own, ready to record.",
+          "kind": "method",
+          "params": [],
+          "returns": "CommandBuffer",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "submit_and_wait",
+          "docs": "Submits `commands`, ending it first, and waits for the GPU to finish them.",
+          "kind": "method",
+          "params": [{ "name": "commands", "type": "CommandBuffer", "borrow": "exclusive" }],
+          "returns": "void",
+          "fallible": true,
+          "blocking": true
+        },
+        {
+          "name": "submit",
+          "docs": "Submits `commands`, ending it first. The future settles when the GPU has finished them.",
+          "kind": "method",
+          "params": [{ "name": "commands", "type": "CommandBuffer", "borrow": "exclusive" }],
+          "returns": "future<void>",
+          "fallible": true,
+          "blocking": false
+        }
+      ]
+    },
+    {
+      "name": "Buffer",
+      "docs": "Memory the CPU maps for as long as the buffer lives.",
+      "methods": [
+        {
+          "name": "size",
+          "kind": "method",
+          "params": [],
+          "returns": "i64",
+          "fallible": false,
+          "blocking": false
+        },
+        {
+          "name": "write",
+          "docs": "Copies `bytes` into the buffer at `offset`.",
+          "kind": "method",
+          "params": [{ "name": "offset", "type": "i64" }, { "name": "bytes", "type": "bytes" }],
+          "returns": "void",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "read",
+          "docs": "`length` bytes from `offset`.",
+          "kind": "method",
+          "params": [{ "name": "offset", "type": "i64" }, { "name": "length", "type": "i64" }],
+          "returns": "bytes",
+          "fallible": true,
+          "blocking": false
+        }
+      ]
+    },
+    {
+      "name": "Image",
+      "docs": "A 2D image in device memory, with one view of all of it.",
+      "methods": [
+        {
+          "name": "width",
+          "kind": "method",
+          "params": [],
+          "returns": "i32",
+          "fallible": false,
+          "blocking": false
+        },
+        {
+          "name": "height",
+          "kind": "method",
+          "params": [],
+          "returns": "i32",
+          "fallible": false,
+          "blocking": false
+        }
+      ]
+    },
+    {
+      "name": "Sampler",
+      "methods": []
+    },
+    {
+      "name": "ShaderModule",
+      "methods": []
+    },
+    {
+      "name": "SetLayouts",
+      "docs": "The descriptor set layouts of a pipeline, set 0 first.",
+      "methods": [
+        {
+          "name": "count",
+          "docs": "How many sets there are.",
+          "kind": "method",
+          "params": [],
+          "returns": "i32",
+          "fallible": false,
+          "blocking": false
+        }
+      ]
+    },
+    {
+      "name": "PipelineLayout",
+      "methods": []
+    },
+    {
+      "name": "Pipeline",
+      "methods": []
+    },
+    {
+      "name": "DescriptorSet",
+      "docs": "A descriptor set, written binding by binding before a command buffer binds it.",
+      "methods": [
+        {
+          "name": "write_buffer",
+          "docs": "Points `binding`, a uniform or storage buffer, at `size` bytes of `buffer` from `offset`.",
+          "kind": "mutating",
+          "params": [{ "name": "binding", "type": "i32" }, { "name": "buffer", "type": "Buffer" }, { "name": "offset", "type": "i64" }, { "name": "size", "type": "i64" }],
+          "returns": "void",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "write_image",
+          "docs": "Points `binding`, a sampled or storage image, at `image` in `layout`.",
+          "kind": "mutating",
+          "params": [{ "name": "binding", "type": "i32" }, { "name": "image", "type": "Image" }, { "name": "layout", "type": "Layout" }],
+          "returns": "void",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "write_sampler",
+          "docs": "Points `binding`, a sampler, at `sampler`.",
+          "kind": "mutating",
+          "params": [{ "name": "binding", "type": "i32" }, { "name": "sampler", "type": "Sampler" }],
+          "returns": "void",
+          "fallible": true,
+          "blocking": false
+        }
+      ]
+    },
+    {
+      "name": "CommandBuffer",
+      "docs": "Records commands until a `Device.submit`. Not thread-safe: its methods take `&mut self`.",
+      "methods": [
+        {
+          "name": "bind_pipeline",
+          "kind": "mutating",
+          "params": [{ "name": "point", "type": "BindPoint" }, { "name": "pipeline", "type": "Pipeline" }],
+          "returns": "void",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "bind_descriptor_set",
+          "docs": "Binds `set` as set `index` of `layout`: hxnsl's bind group `index`.",
+          "kind": "mutating",
+          "params": [{ "name": "point", "type": "BindPoint" }, { "name": "layout", "type": "PipelineLayout" }, { "name": "index", "type": "i32" }, { "name": "set", "type": "DescriptorSet" }],
+          "returns": "void",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "dispatch",
+          "kind": "mutating",
+          "params": [{ "name": "x", "type": "i32" }, { "name": "y", "type": "i32" }, { "name": "z", "type": "i32" }],
+          "returns": "void",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "buffer_barrier",
+          "docs": "A barrier on all of `buffer`: work in `src_stages` doing `src_access` finishes, and its\nwrites are visible, before work in `dst_stages` doing `dst_access` starts.",
+          "kind": "mutating",
+          "params": [{ "name": "buffer", "type": "Buffer" }, { "name": "src_stages", "type": "i32" }, { "name": "src_access", "type": "i32" }, { "name": "dst_stages", "type": "i32" }, { "name": "dst_access", "type": "i32" }],
+          "returns": "void",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "image_barrier",
+          "docs": "A barrier on all of `image` that also moves it from layout `from` to `to`.",
+          "kind": "mutating",
+          "params": [{ "name": "image", "type": "Image" }, { "name": "src_stages", "type": "i32" }, { "name": "src_access", "type": "i32" }, { "name": "from", "type": "Layout" }, { "name": "dst_stages", "type": "i32" }, { "name": "dst_access", "type": "i32" }, { "name": "to", "type": "Layout" }],
+          "returns": "void",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "memory_barrier",
+          "docs": "A barrier on all memory, for work that touches more than one resource.",
+          "kind": "mutating",
+          "params": [{ "name": "src_stages", "type": "i32" }, { "name": "src_access", "type": "i32" }, { "name": "dst_stages", "type": "i32" }, { "name": "dst_access", "type": "i32" }],
+          "returns": "void",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "begin_rendering",
+          "docs": "Begins rendering into `target`, which must be in the color attachment layout, starting\nfrom it as it is, cleared to `red`, `green`, `blue`, `alpha`, or undefined. Sets the\nviewport and scissor to all of it.",
+          "kind": "mutating",
+          "params": [{ "name": "target", "type": "Image" }, { "name": "load", "type": "LoadOp" }, { "name": "red", "type": "f64" }, { "name": "green", "type": "f64" }, { "name": "blue", "type": "f64" }, { "name": "alpha", "type": "f64" }],
+          "returns": "void",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "end_rendering",
+          "kind": "mutating",
+          "params": [],
+          "returns": "void",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "bind_vertex_buffer",
+          "kind": "mutating",
+          "params": [{ "name": "binding", "type": "i32" }, { "name": "buffer", "type": "Buffer" }, { "name": "offset", "type": "i64" }],
+          "returns": "void",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "draw",
+          "docs": "Draws `count` vertices from `first`, `instances` times.",
+          "kind": "mutating",
+          "params": [{ "name": "count", "type": "i32" }, { "name": "instances", "type": "i32" }, { "name": "first", "type": "i32" }],
+          "returns": "void",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "copy_image_to_buffer",
+          "docs": "Copies all of `image`, which must be in the transfer source layout, into `buffer`, rows\npacked.",
+          "kind": "mutating",
+          "params": [{ "name": "image", "type": "Image" }, { "name": "buffer", "type": "Buffer" }],
+          "returns": "void",
+          "fallible": true,
+          "blocking": false
+        }
+      ]
+    }
+  ]
+}
