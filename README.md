@@ -4,12 +4,14 @@
 [![HashLink](https://github.com/hx-n/hxn-gpu-vulkan/actions/workflows/hashlink.yml/badge.svg)](https://github.com/hx-n/hxn-gpu-vulkan/actions/workflows/hashlink.yml)
 [![hxcpp](https://github.com/hx-n/hxn-gpu-vulkan/actions/workflows/hxcpp.yml/badge.svg)](https://github.com/hx-n/hxn-gpu-vulkan/actions/workflows/hxcpp.yml)
 [![CPPIA](https://github.com/hx-n/hxn-gpu-vulkan/actions/workflows/cppia.yml/badge.svg)](https://github.com/hx-n/hxn-gpu-vulkan/actions/workflows/cppia.yml)
+[![Present](https://github.com/hx-n/hxn-gpu-vulkan/actions/workflows/present.yml/badge.svg)](https://github.com/hx-n/hxn-gpu-vulkan/actions/workflows/present.yml)
 
 Vulkan bindings for Haxe on Ash, HashLink, hxcpp and CPPIA, on Linux,
 Windows, Android and macOS (through MoltenVK). The API follows Vulkan:
-`Instance`, `Device`, buffers, images, descriptor sets, pipelines and command
-buffers. Synchronization is explicit: you record the barriers and image
-layout transitions your commands need.
+`Instance`, `Device`, buffers, images, descriptor sets, pipelines, command
+buffers, and swapchains that present to a window. Synchronization is
+explicit: you record the barriers and image layout transitions your commands
+need.
 
 Shaders come from [hxnsl](https://github.com/hx-n/hxnsl), which compiles HXSL
 to SPIR-V at compile time. hxnsl's bind groups are the descriptor sets, and
@@ -69,10 +71,39 @@ All in the package `hxn.gpu.vulkan`:
 | `DescriptorSet` | `writeBuffer`, `writeImage`, `writeSampler` by binding. |
 | `Pipeline` | A compute or graphics pipeline. A graphics pipeline renders into one color attachment with dynamic rendering, and takes its vertex buffers' layout as `VertexBinding`s and `VertexAttribute`s. |
 | `CommandBuffer` | Binding, dispatches, rendering, draws, copies, and `bufferBarrier`, `imageBarrier` and `memoryBarrier`. |
+| `Surface` | A window's surface, from `Instance.createSurface(platform, raw0, raw1, raw2, raw3)`. |
+| `Swapchain` | A window's images, from `Device.createSwapchain`: `acquire`, `present` and `resize`. |
 
 Every object holds its Vulkan object until `close()`, and the device lives
 until everything made from it is closed. Vulkan's errors are thrown as Haxe
 exceptions.
+
+## Windows
+
+`Instance.createSurface` takes [hxn-window](https://github.com/hx-n/hxn-window)'s
+`platform()` and `raw(0)` to `raw(3)`, on AppKit and UIKit (through MoltenVK),
+Win32, Xlib, Wayland and Android. `Device.createSwapchain(surface, width, height,
+format, vsync)` makes the images to present. Each frame, `acquire` waits for the
+next image, a render pass draws into it, a barrier moves it to `Layout.Present`,
+and `present` shows it once the work submitted before has finished. `present`
+returns false when the window has changed size; `resize` then makes the
+swapchain again. The window's surface sets the images' size, which on a
+high-density display can be larger than the size asked for: read it from
+`width` and `height`.
+
+```haxe
+var surface = instance.createSurface(window.platform(), window.raw(0), window.raw(1), window.raw(2), window.raw(3));
+var swapchain = device.createSwapchain(surface, 640, 480, Format.Bgra8Unorm, true);
+var image = swapchain.acquire();
+commands.imageBarrier(image, Stage.TopOfPipe, 0, Layout.Undefined, Stage.ColorAttachmentOutput, Access.ColorAttachmentWrite, Layout.ColorAttachment);
+commands.beginRendering(image, LoadOp.Clear, 0, 0, 0, 1);
+// ... draws ...
+commands.endRendering();
+commands.imageBarrier(image, Stage.ColorAttachmentOutput, Access.ColorAttachmentWrite, Layout.ColorAttachment, Stage.BottomOfPipe, 0, Layout.Present);
+device.submit(commands);
+if (!swapchain.present())
+	swapchain.resize(width, height);
+```
 
 ## Synchronization
 

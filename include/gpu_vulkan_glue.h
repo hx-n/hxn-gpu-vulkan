@@ -41,9 +41,21 @@ inline void *instance_create_device(void *self, int index) {
 	return out;
 }
 
+inline void *instance_create_surface(void *self, int platform, cpp::Int64 wa, cpp::Int64 wb, cpp::Int64 da, cpp::Int64 db) {
+	hxn_handle *out = 0;
+	hxn_buf err = HXN_BUF_EMPTY;
+	hxn::check(hxn_gpu_vulkan_instance_create_surface((hxn_handle *)self, platform, wa, wb, da, db, &out, &err), err);
+	return out;
+}
+
 inline void instance_drop(void *self) {
 	hxn_buf err = HXN_BUF_EMPTY;
 	hxn::check(hxn_gpu_vulkan_instance_drop((hxn_handle *)self, &err), err);
+}
+
+inline void surface_drop(void *self) {
+	hxn_buf err = HXN_BUF_EMPTY;
+	hxn::check(hxn_gpu_vulkan_surface_drop((hxn_handle *)self, &err), err);
 }
 
 inline void *device_create_buffer(void *self, cpp::Int64 size, int usage) {
@@ -126,6 +138,13 @@ inline void *device_create_command_buffer(void *self) {
 	return out;
 }
 
+inline void *device_create_swapchain(void *self, void *surface, int width, int height, int format, bool vsync) {
+	hxn_handle *out = 0;
+	hxn_buf err = HXN_BUF_EMPTY;
+	hxn::check(hxn_gpu_vulkan_device_create_swapchain((hxn_handle *)self, (hxn_handle *)surface, width, height, format, vsync ? 1 : 0, &out, &err), err);
+	return out;
+}
+
 inline void device_submit_and_wait(void *self, void *commands) {
 	hxn_buf err = HXN_BUF_EMPTY;
 	hxn_status status;
@@ -189,6 +208,59 @@ inline int image_height(void *self) {
 inline void image_drop(void *self) {
 	hxn_buf err = HXN_BUF_EMPTY;
 	hxn::check(hxn_gpu_vulkan_image_drop((hxn_handle *)self, &err), err);
+}
+
+inline int swapchain_width(void *self) {
+	int out = 0;
+	hxn_buf err = HXN_BUF_EMPTY;
+	hxn::check(hxn_gpu_vulkan_swapchain_width((hxn_handle *)self, &out, &err), err);
+	return out;
+}
+
+inline int swapchain_height(void *self) {
+	int out = 0;
+	hxn_buf err = HXN_BUF_EMPTY;
+	hxn::check(hxn_gpu_vulkan_swapchain_height((hxn_handle *)self, &out, &err), err);
+	return out;
+}
+
+inline void *swapchain_acquire(void *self) {
+	hxn_handle *out = 0;
+	hxn_buf err = HXN_BUF_EMPTY;
+	hxn_status status;
+	{
+		hxn::Blocking zone;
+		status = hxn_gpu_vulkan_swapchain_acquire((hxn_handle *)self, &out, &err);
+	}
+	hxn::check(status, err);
+	return out;
+}
+
+inline bool swapchain_present(void *self) {
+	int out = 0;
+	hxn_buf err = HXN_BUF_EMPTY;
+	hxn_status status;
+	{
+		hxn::Blocking zone;
+		status = hxn_gpu_vulkan_swapchain_present((hxn_handle *)self, &out, &err);
+	}
+	hxn::check(status, err);
+	return out != 0;
+}
+
+inline void swapchain_resize(void *self, int width, int height) {
+	hxn_buf err = HXN_BUF_EMPTY;
+	hxn_status status;
+	{
+		hxn::Blocking zone;
+		status = hxn_gpu_vulkan_swapchain_resize((hxn_handle *)self, width, height, &err);
+	}
+	hxn::check(status, err);
+}
+
+inline void swapchain_drop(void *self) {
+	hxn_buf err = HXN_BUF_EMPTY;
+	hxn::check(hxn_gpu_vulkan_swapchain_drop((hxn_handle *)self, &err), err);
 }
 
 inline void sampler_drop(void *self) {

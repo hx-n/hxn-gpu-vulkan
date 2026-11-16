@@ -1,6 +1,6 @@
 [package]
 name = "hxn-gpu-vulkan"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2024"
 description = "Vulkan for Haxe: devices, buffers, images, descriptor sets, pipelines and command buffers with explicit barriers"
 repository = "https://github.com/hx-n/hxn-gpu-vulkan"
@@ -15,7 +15,7 @@ name = "hxn_gpu_vulkan"
 library = "gpu_vulkan"
 haxelib = "hxn-gpu-vulkan"
 contributors = ["darmie", "rayzor"]
-releasenote = "Moves to the hxn.gpu.vulkan package, on hxn 0.3.5."
+releasenote = "Presents to windows: Instance.createSurface on AppKit, UIKit, Win32, Xlib, Wayland and Android windows from hxn-window's handles, and Device.createSwapchain with acquire, present and resize."
 # The check `hxn check` and `hxn run` build.
 haxe = "examples/check"
 haxe-flags = ["-lib", "hxnsl"]
@@ -27,3 +27,6 @@ hxn = { git = "https://github.com/hx-n/hxn.git", tag = "v0.3.5" }
 hxn-future = { git = "https://github.com/hx-n/hxn.git", tag = "v0.3.5" }
 # Loads the Vulkan loader at run time, so the library links against no Vulkan SDK.
 ash = { version = "0.38", default-features = false, features = ["loaded", "std", "debug"] }
+# Surfaces for each window system, from the handles hxn-window gives.
+ash-window = "0.13"
+raw-window-handle = "0.6"

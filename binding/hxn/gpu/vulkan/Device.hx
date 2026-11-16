@@ -97,6 +97,13 @@ class Device {
 	public function createCommandBuffer():CommandBuffer
 		return CommandBuffer.hxnAdopt(HxnGpuVulkanNative.device_create_command_buffer(hxnRaw));
 
+	/**
+		A swapchain on `surface` of `width` by `height` `format` images, presenting with the
+		display's refresh when `vsync`. The window may size it differently: see `width`.
+	**/
+	public function createSwapchain(surface:Surface, width:Int, height:Int, format:Format, vsync:Bool):Swapchain
+		return Swapchain.hxnAdopt(HxnGpuVulkanNative.device_create_swapchain(hxnRaw, surface == null ? null : surface.hxnRaw, width, height, format, vsync));
+
 	/** Submits `commands`, ending it first, and waits for the GPU to finish them. **/
 	public function submitAndWait(commands:CommandBuffer):Void
 		HxnGpuVulkanNative.device_submit_and_wait(hxnRaw, commands == null ? null : commands.hxnRaw);

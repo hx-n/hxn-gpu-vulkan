@@ -141,8 +141,22 @@
           "returns": "Device",
           "fallible": true,
           "blocking": false
+        },
+        {
+          "name": "create_surface",
+          "docs": "A surface on the window that hxn-window's `platform()` and `raw(0)` to `raw(3)`\ndescribe: 1 AppKit, 2 Win32, 3 Xlib, 4 Wayland, 5 Android or 6 UIKit.",
+          "kind": "method",
+          "params": [{ "name": "platform", "type": "i32" }, { "name": "wa", "type": "i64" }, { "name": "wb", "type": "i64" }, { "name": "da", "type": "i64" }, { "name": "db", "type": "i64" }],
+          "returns": "Surface",
+          "fallible": true,
+          "blocking": false
         }
       ]
+    },
+    {
+      "name": "Surface",
+      "docs": "A window's Vulkan surface, which a swapchain presents to.",
+      "methods": []
     },
     {
       "name": "Device",
@@ -247,6 +261,15 @@
           "blocking": false
         },
         {
+          "name": "create_swapchain",
+          "docs": "A swapchain on `surface` of `width` by `height` `format` images, presenting with the\ndisplay's refresh when `vsync`. The window may size it differently: see `width`.",
+          "kind": "method",
+          "params": [{ "name": "surface", "type": "Surface" }, { "name": "width", "type": "i32" }, { "name": "height", "type": "i32" }, { "name": "format", "type": "Format" }, { "name": "vsync", "type": "bool" }],
+          "returns": "Swapchain",
+          "fallible": true,
+          "blocking": false
+        },
+        {
           "name": "submit_and_wait",
           "docs": "Submits `commands`, ending it first, and waits for the GPU to finish them.",
           "kind": "method",
@@ -317,6 +340,55 @@
           "returns": "i32",
           "fallible": false,
           "blocking": false
+        }
+      ]
+    },
+    {
+      "name": "Swapchain",
+      "docs": "A window's images to render into and present, made for one size.",
+      "methods": [
+        {
+          "name": "width",
+          "kind": "method",
+          "params": [],
+          "returns": "i32",
+          "fallible": false,
+          "blocking": false
+        },
+        {
+          "name": "height",
+          "kind": "method",
+          "params": [],
+          "returns": "i32",
+          "fallible": false,
+          "blocking": false
+        },
+        {
+          "name": "acquire",
+          "docs": "Waits for the window system's next image, and returns it to render into. It stays\nthis swapchain's: `present` shows it, and closing the returned image frees only its view.",
+          "kind": "mutating",
+          "params": [],
+          "returns": "Image",
+          "fallible": true,
+          "blocking": true
+        },
+        {
+          "name": "present",
+          "docs": "Shows the image `acquire` gave, once the work submitted before has finished; it must be\nin `Layout.Present`. Returns false when the window changed and the swapchain needs\n`resize`.",
+          "kind": "mutating",
+          "params": [],
+          "returns": "bool",
+          "fallible": true,
+          "blocking": true
+        },
+        {
+          "name": "resize",
+          "docs": "Makes the swapchain again for the window's new size.",
+          "kind": "mutating",
+          "params": [{ "name": "width", "type": "i32" }, { "name": "height", "type": "i32" }],
+          "returns": "void",
+          "fallible": true,
+          "blocking": true
         }
       ]
     },

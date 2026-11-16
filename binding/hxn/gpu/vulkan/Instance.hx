@@ -34,6 +34,13 @@ class Instance {
 		return Device.hxnAdopt(HxnGpuVulkanNative.instance_create_device(hxnRaw, index));
 
 	/**
+		A surface on the window that hxn-window's `platform()` and `raw(0)` to `raw(3)`
+		describe: 1 AppKit, 2 Win32, 3 Xlib, 4 Wayland, 5 Android or 6 UIKit.
+	**/
+	public function createSurface(platform:Int, wa:haxe.Int64, wb:haxe.Int64, da:haxe.Int64, db:haxe.Int64):Surface
+		return Surface.hxnAdopt(HxnGpuVulkanNative.instance_create_surface(hxnRaw, platform, wa, wb, da, db));
+
+	/**
 		Releases the native value now. The collector does it otherwise. Using
 		this object afterwards throws.
 	**/

@@ -5,7 +5,11 @@
 //! Rendering uses dynamic rendering and barriers use synchronization2, from Vulkan 1.3 or
 //! their extensions on Vulkan 1.2, which is what MoltenVK provides.
 
-use std::ffi::{CStr, CString, c_char};
+use std::ffi::{CStr, CString, c_char, c_void};
+use std::num::NonZeroIsize;
+use std::ptr::NonNull;
+
+use raw_window_handle::{RawDisplayHandle, RawWindowHandle};
 use std::sync::{Arc, Mutex};
 
 use ash::vk;
@@ -27,7 +31,7 @@ fn u32_of(value: i32, what: &str) -> Result<u32, String> {
 
 /// The loader and the `VkInstance`, destroyed after every device made from it.
 struct InstanceShared {
-    _entry: ash::Entry,
+    entry: ash::Entry,
     instance: ash::Instance,
 }
 
@@ -47,6 +51,9 @@ struct DeviceShared {
     memory: vk::PhysicalDeviceMemoryProperties,
     sync2: ash::khr::synchronization2::Device,
     rendering: ash::khr::dynamic_rendering::Device,
+    // Whether the device has VK_KHR_swapchain, which presenting needs.
+    presents: bool,
+    physical: vk::PhysicalDevice,
 }
 
 impl Drop for DeviceShared {
@@ -323,6 +330,20 @@ impl Instance {
         if has(ash::khr::get_physical_device_properties2::NAME) {
             extensions.push(ash::khr::get_physical_device_properties2::NAME.as_ptr());
         }
+        // Every window system's surface the loader has, so any window can be presented to.
+        for surface in [
+            ash::khr::surface::NAME,
+            ash::khr::win32_surface::NAME,
+            ash::khr::xlib_surface::NAME,
+            ash::khr::xcb_surface::NAME,
+            ash::khr::wayland_surface::NAME,
+            ash::khr::android_surface::NAME,
+            ash::ext::metal_surface::NAME,
+        ] {
+            if has(surface) {
+                extensions.push(surface.as_ptr());
+            }
+        }
         let app_name = CString::new(name).map_err(|_| "the name contains a NUL")?;
         let app = vk::ApplicationInfo::default()
             .application_name(&app_name)
@@ -336,10 +357,7 @@ impl Instance {
         let devices = unsafe { instance.enumerate_physical_devices() }
             .map_err(|e| failed("listing devices", e))?;
         Ok(Instance {
-            shared: Arc::new(InstanceShared {
-                _entry: entry,
-                instance,
-            }),
+            shared: Arc::new(InstanceShared { entry, instance }),
             devices,
         })
     }
@@ -395,6 +413,10 @@ impl Instance {
         if has(ash::khr::portability_subset::NAME) {
             extensions.push(ash::khr::portability_subset::NAME.as_ptr());
         }
+        let presents = has(ash::khr::swapchain::NAME);
+        if presents {
+            extensions.push(ash::khr::swapchain::NAME.as_ptr());
+        }
         let priorities = [1.0f32];
         let queues = [vk::DeviceQueueCreateInfo::default()
             .queue_family_index(family)
@@ -421,9 +443,109 @@ impl Instance {
                 queue: Mutex::new(queue),
                 family,
                 memory,
+                presents,
+                physical: pd,
             }),
         })
     }
+
+    /// A surface on the window that hxn-window's `platform()` and `raw(0)` to `raw(3)`
+    /// describe: 1 AppKit, 2 Win32, 3 Xlib, 4 Wayland, 5 Android or 6 UIKit.
+    pub fn create_surface(
+        &self,
+        platform: i32,
+        wa: i64,
+        wb: i64,
+        da: i64,
+        db: i64,
+    ) -> Result<Surface, String> {
+        let (display, window) = window_handles(platform, [wa, wb, da, db])?;
+        let shared = &self.shared;
+        let surface = unsafe {
+            ash_window::create_surface(&shared.entry, &shared.instance, display, window, None)
+        }
+        .map_err(|e| failed("creating the window's surface", e))?;
+        Ok(Surface {
+            shared: Arc::new(SurfaceShared {
+                loader: ash::khr::surface::Instance::new(&shared.entry, &shared.instance),
+                instance: shared.clone(),
+                surface,
+            }),
+        })
+    }
+}
+
+/// The display and window handles of an hxn-window platform code and its four raw handles.
+fn window_handles(
+    platform: i32,
+    raw: [i64; 4],
+) -> Result<(RawDisplayHandle, RawWindowHandle), String> {
+    use raw_window_handle as rwh;
+    let [wa, wb, da, db] = raw;
+    let pointer = |v: i64| NonNull::new(v as usize as *mut c_void).ok_or("a window handle is null");
+    Ok(match platform {
+        1 => (
+            RawDisplayHandle::AppKit(rwh::AppKitDisplayHandle::new()),
+            RawWindowHandle::AppKit(rwh::AppKitWindowHandle::new(pointer(wa)?)),
+        ),
+        2 => {
+            let mut window = rwh::Win32WindowHandle::new(
+                NonZeroIsize::new(wa as isize).ok_or("the HWND is null")?,
+            );
+            window.hinstance = NonZeroIsize::new(wb as isize);
+            (
+                RawDisplayHandle::Windows(rwh::WindowsDisplayHandle::new()),
+                RawWindowHandle::Win32(window),
+            )
+        }
+        3 => {
+            let mut window = rwh::XlibWindowHandle::new(wa as std::os::raw::c_ulong);
+            window.visual_id = wb as std::os::raw::c_ulong;
+            (
+                RawDisplayHandle::Xlib(rwh::XlibDisplayHandle::new(
+                    NonNull::new(da as usize as *mut c_void),
+                    db as i32,
+                )),
+                RawWindowHandle::Xlib(window),
+            )
+        }
+        4 => (
+            RawDisplayHandle::Wayland(rwh::WaylandDisplayHandle::new(pointer(da)?)),
+            RawWindowHandle::Wayland(rwh::WaylandWindowHandle::new(pointer(wa)?)),
+        ),
+        5 => (
+            RawDisplayHandle::Android(rwh::AndroidDisplayHandle::new()),
+            RawWindowHandle::AndroidNdk(rwh::AndroidNdkWindowHandle::new(pointer(wa)?)),
+        ),
+        6 => {
+            let mut window = rwh::UiKitWindowHandle::new(pointer(wa)?);
+            window.ui_view_controller = NonNull::new(wb as usize as *mut c_void);
+            (
+                RawDisplayHandle::UiKit(rwh::UiKitDisplayHandle::new()),
+                RawWindowHandle::UiKit(window),
+            )
+        }
+        other => return Err(format!("Vulkan presents to no window of platform {other}")),
+    })
+}
+
+struct SurfaceShared {
+    instance: Arc<InstanceShared>,
+    loader: ash::khr::surface::Instance,
+    surface: vk::SurfaceKHR,
+}
+
+impl Drop for SurfaceShared {
+    fn drop(&mut self) {
+        unsafe { self.loader.destroy_surface(self.surface, None) };
+        let _ = &self.instance;
+    }
+}
+
+/// A window's Vulkan surface, which a swapchain presents to.
+#[hxn::interface]
+pub struct Surface {
+    shared: Arc<SurfaceShared>,
 }
 
 /// A logical device and its queue; every other object comes from one.
@@ -546,6 +668,7 @@ impl Device {
             width,
             height,
             aspect,
+            owned: true,
         })
     }
 
@@ -875,6 +998,19 @@ impl Device {
         })
     }
 
+    /// A swapchain on `surface` of `width` by `height` `format` images, presenting with the
+    /// display's refresh when `vsync`. The window may size it differently: see `width`.
+    pub fn create_swapchain(
+        &self,
+        surface: &Surface,
+        width: i32,
+        height: i32,
+        format: Format,
+        vsync: bool,
+    ) -> Result<Swapchain, String> {
+        self.swapchain_of(surface, width, height, format, vsync)
+    }
+
     /// Submits `commands`, ending it first, and waits for the GPU to finish them.
     #[hxn(blocking)]
     pub fn submit_and_wait(&self, commands: &mut CommandBuffer) -> Result<(), String> {
@@ -1016,6 +1152,8 @@ pub struct Image {
     width: u32,
     height: u32,
     aspect: vk::ImageAspectFlags,
+    // False for a swapchain's image, which the swapchain owns; only the view is this one's.
+    owned: bool,
 }
 
 #[hxn::methods]
@@ -1034,10 +1172,293 @@ impl Drop for Image {
         let d = &self.shared.device;
         unsafe {
             d.destroy_image_view(self.view, None);
-            d.destroy_image(self.image, None);
-            d.free_memory(self.memory, None);
+            if self.owned {
+                d.destroy_image(self.image, None);
+                d.free_memory(self.memory, None);
+            }
         }
     }
+}
+
+/// A window's images to render into and present, made for one size.
+#[hxn::interface]
+pub struct Swapchain {
+    device: Arc<DeviceShared>,
+    surface: Arc<SurfaceShared>,
+    loader: ash::khr::swapchain::Device,
+    swapchain: vk::SwapchainKHR,
+    images: Vec<vk::Image>,
+    format: Format,
+    vsync: bool,
+    width: u32,
+    height: u32,
+    // Signalled when the window system hands over the image `acquire` asked for.
+    acquired_fence: vk::Fence,
+    acquired: Option<u32>,
+}
+
+impl Drop for Swapchain {
+    fn drop(&mut self) {
+        let d = &self.device.device;
+        unsafe {
+            let _ = d.device_wait_idle();
+            self.loader.destroy_swapchain(self.swapchain, None);
+            d.destroy_fence(self.acquired_fence, None);
+        }
+        let _ = &self.surface;
+    }
+}
+
+#[hxn::methods]
+impl Swapchain {
+    pub fn width(&self) -> i32 {
+        self.width as i32
+    }
+
+    pub fn height(&self) -> i32 {
+        self.height as i32
+    }
+
+    /// Waits for the window system's next image, and returns it to render into. It stays
+    /// this swapchain's: `present` shows it, and closing the returned image frees only its view.
+    #[hxn(blocking)]
+    pub fn acquire(&mut self) -> Result<Image, String> {
+        if self.acquired.is_some() {
+            return Err("an image is acquired and not yet presented".into());
+        }
+        let d = &self.device.device;
+        let (index, _) = unsafe {
+            self.loader.acquire_next_image(
+                self.swapchain,
+                u64::MAX,
+                vk::Semaphore::null(),
+                self.acquired_fence,
+            )
+        }
+        .map_err(|e| failed("acquiring the window's next image", e))?;
+        unsafe {
+            d.wait_for_fences(&[self.acquired_fence], true, u64::MAX)
+                .map_err(|e| failed("waiting for the window's image", e))?;
+            d.reset_fences(&[self.acquired_fence])
+                .map_err(|e| failed("resetting a fence", e))?;
+        }
+        let image = self.images[index as usize];
+        let view = unsafe {
+            d.create_image_view(
+                &vk::ImageViewCreateInfo::default()
+                    .image(image)
+                    .view_type(vk::ImageViewType::TYPE_2D)
+                    .format(self.format.raw())
+                    .subresource_range(whole(vk::ImageAspectFlags::COLOR)),
+                None,
+            )
+        }
+        .map_err(|e| failed("creating the window image's view", e))?;
+        self.acquired = Some(index);
+        Ok(Image {
+            shared: self.device.clone(),
+            image,
+            memory: vk::DeviceMemory::null(),
+            view,
+            width: self.width,
+            height: self.height,
+            aspect: vk::ImageAspectFlags::COLOR,
+            owned: false,
+        })
+    }
+
+    /// Shows the image `acquire` gave, once the work submitted before has finished; it must be
+    /// in `Layout.Present`. Returns false when the window changed and the swapchain needs
+    /// `resize`.
+    #[hxn(blocking)]
+    pub fn present(&mut self) -> Result<bool, String> {
+        let index = self
+            .acquired
+            .take()
+            .ok_or("present needs an image from acquire")?;
+        let queue = self
+            .device
+            .queue
+            .lock()
+            .map_err(|_| "the queue's lock is poisoned")?;
+        unsafe { self.device.device.queue_wait_idle(*queue) }
+            .map_err(|e| failed("waiting for the GPU", e))?;
+        let swapchains = [self.swapchain];
+        let indices = [index];
+        let info = vk::PresentInfoKHR::default()
+            .swapchains(&swapchains)
+            .image_indices(&indices);
+        match unsafe { self.loader.queue_present(*queue, &info) } {
+            Ok(suboptimal) => Ok(!suboptimal),
+            Err(vk::Result::ERROR_OUT_OF_DATE_KHR) => Ok(false),
+            Err(e) => Err(failed("presenting", e)),
+        }
+    }
+
+    /// Makes the swapchain again for the window's new size.
+    #[hxn(blocking)]
+    pub fn resize(&mut self, width: i32, height: i32) -> Result<(), String> {
+        unsafe { self.device.device.device_wait_idle() }
+            .map_err(|e| failed("waiting for the GPU", e))?;
+        let (swapchain, images, w, h) = make_swapchain(
+            &self.device,
+            &self.surface,
+            &self.loader,
+            u32_of(width, "a width")?,
+            u32_of(height, "a height")?,
+            self.format,
+            self.vsync,
+            self.swapchain,
+        )?;
+        unsafe { self.loader.destroy_swapchain(self.swapchain, None) };
+        self.swapchain = swapchain;
+        self.images = images;
+        self.width = w;
+        self.height = h;
+        self.acquired = None;
+        Ok(())
+    }
+}
+
+impl Device {
+    fn swapchain_of(
+        &self,
+        surface: &Surface,
+        width: i32,
+        height: i32,
+        format: Format,
+        vsync: bool,
+    ) -> Result<Swapchain, String> {
+        if !self.shared.presents {
+            return Err("the GPU has no VK_KHR_swapchain to present with".into());
+        }
+        let loader = ash::khr::swapchain::Device::new(
+            &surface.shared.instance.instance,
+            &self.shared.device,
+        );
+        let (swapchain, images, w, h) = make_swapchain(
+            &self.shared,
+            &surface.shared,
+            &loader,
+            u32_of(width, "a width")?,
+            u32_of(height, "a height")?,
+            format,
+            vsync,
+            vk::SwapchainKHR::null(),
+        )?;
+        let fence = unsafe {
+            self.shared
+                .device
+                .create_fence(&vk::FenceCreateInfo::default(), None)
+        }
+        .map_err(|e| failed("creating a fence", e))?;
+        Ok(Swapchain {
+            device: self.shared.clone(),
+            surface: surface.shared.clone(),
+            loader,
+            swapchain,
+            images,
+            format,
+            vsync,
+            width: w,
+            height: h,
+            acquired_fence: fence,
+            acquired: None,
+        })
+    }
+}
+
+/// A swapchain on `surface` of `width` by `height` `format` images, replacing `old`.
+#[allow(clippy::too_many_arguments)]
+fn make_swapchain(
+    device: &DeviceShared,
+    surface: &SurfaceShared,
+    loader: &ash::khr::swapchain::Device,
+    width: u32,
+    height: u32,
+    format: Format,
+    vsync: bool,
+    old: vk::SwapchainKHR,
+) -> Result<(vk::SwapchainKHR, Vec<vk::Image>, u32, u32), String> {
+    let pd = device.physical;
+    let sl = &surface.loader;
+    let supported =
+        unsafe { sl.get_physical_device_surface_support(pd, device.family, surface.surface) }
+            .map_err(|e| failed("asking whether the queue presents", e))?;
+    if !supported {
+        return Err("the GPU's queue cannot present to this window".into());
+    }
+    let caps = unsafe { sl.get_physical_device_surface_capabilities(pd, surface.surface) }
+        .map_err(|e| failed("reading the window's surface", e))?;
+    let formats = unsafe { sl.get_physical_device_surface_formats(pd, surface.surface) }
+        .map_err(|e| failed("listing the window's formats", e))?;
+    let chosen = formats
+        .iter()
+        .find(|f| f.format == format.raw())
+        .ok_or_else(|| {
+            format!(
+                "the window has no {:?} format; it has {:?}",
+                format.raw(),
+                formats.iter().map(|f| f.format).collect::<Vec<_>>()
+            )
+        })?;
+    let modes = unsafe { sl.get_physical_device_surface_present_modes(pd, surface.surface) }
+        .map_err(|e| failed("listing the window's present modes", e))?;
+    let mode = if vsync {
+        vk::PresentModeKHR::FIFO
+    } else {
+        [vk::PresentModeKHR::MAILBOX, vk::PresentModeKHR::IMMEDIATE]
+            .into_iter()
+            .find(|m| modes.contains(m))
+            .unwrap_or(vk::PresentModeKHR::FIFO)
+    };
+    let extent = if caps.current_extent.width != u32::MAX {
+        caps.current_extent
+    } else {
+        vk::Extent2D {
+            width: width.clamp(caps.min_image_extent.width, caps.max_image_extent.width),
+            height: height.clamp(caps.min_image_extent.height, caps.max_image_extent.height),
+        }
+    };
+    let mut count = caps.min_image_count + 1;
+    if caps.max_image_count > 0 {
+        count = count.min(caps.max_image_count);
+    }
+    let mut usage = vk::ImageUsageFlags::COLOR_ATTACHMENT;
+    if caps
+        .supported_usage_flags
+        .contains(vk::ImageUsageFlags::TRANSFER_SRC)
+    {
+        usage |= vk::ImageUsageFlags::TRANSFER_SRC;
+    }
+    let alpha = [
+        vk::CompositeAlphaFlagsKHR::OPAQUE,
+        vk::CompositeAlphaFlagsKHR::INHERIT,
+        vk::CompositeAlphaFlagsKHR::PRE_MULTIPLIED,
+        vk::CompositeAlphaFlagsKHR::POST_MULTIPLIED,
+    ]
+    .into_iter()
+    .find(|a| caps.supported_composite_alpha.contains(*a))
+    .unwrap_or(vk::CompositeAlphaFlagsKHR::OPAQUE);
+    let info = vk::SwapchainCreateInfoKHR::default()
+        .surface(surface.surface)
+        .min_image_count(count)
+        .image_format(chosen.format)
+        .image_color_space(chosen.color_space)
+        .image_extent(extent)
+        .image_array_layers(1)
+        .image_usage(usage)
+        .image_sharing_mode(vk::SharingMode::EXCLUSIVE)
+        .pre_transform(caps.current_transform)
+        .composite_alpha(alpha)
+        .present_mode(mode)
+        .clipped(true)
+        .old_swapchain(old);
+    let swapchain = unsafe { loader.create_swapchain(&info, None) }
+        .map_err(|e| failed("creating the swapchain", e))?;
+    let images = unsafe { loader.get_swapchain_images(swapchain) }
+        .map_err(|e| failed("listing the swapchain's images", e))?;
+    Ok((swapchain, images, extent.width, extent.height))
 }
 
 #[hxn::interface]

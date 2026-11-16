@@ -12,7 +12,11 @@ extern "C" {
 hxn_status hxn_gpu_vulkan_instance_create(hxn_slice name, hxn_handle **out, hxn_buf *err);
 hxn_status hxn_gpu_vulkan_instance_adapter_names(hxn_handle *self, hxn_buf *out, hxn_buf *err);
 hxn_status hxn_gpu_vulkan_instance_create_device(hxn_handle *self, int32_t index, hxn_handle **out, hxn_buf *err);
+hxn_status hxn_gpu_vulkan_instance_create_surface(hxn_handle *self, int32_t platform, int64_t wa, int64_t wb, int64_t da, int64_t db, hxn_handle **out, hxn_buf *err);
 hxn_status hxn_gpu_vulkan_instance_drop(hxn_handle *self, hxn_buf *err);
+
+/* Surface */
+hxn_status hxn_gpu_vulkan_surface_drop(hxn_handle *self, hxn_buf *err);
 
 /* Device */
 hxn_status hxn_gpu_vulkan_device_create_buffer(hxn_handle *self, int64_t size, int32_t usage, hxn_handle **out, hxn_buf *err);
@@ -26,6 +30,7 @@ hxn_status hxn_gpu_vulkan_device_create_descriptor_set(hxn_handle *self, hxn_han
 hxn_status hxn_gpu_vulkan_device_create_compute_pipeline(hxn_handle *self, hxn_handle *module, hxn_slice entry, hxn_handle *layout, hxn_handle **out, hxn_buf *err);
 hxn_status hxn_gpu_vulkan_device_create_graphics_pipeline(hxn_handle *self, hxn_handle *vertex, hxn_slice vertex_entry, hxn_handle *fragment, hxn_slice fragment_entry, hxn_handle *layout, int32_t format, int32_t topology, hxn_slice bindings, hxn_slice attributes, hxn_handle **out, hxn_buf *err);
 hxn_status hxn_gpu_vulkan_device_create_command_buffer(hxn_handle *self, hxn_handle **out, hxn_buf *err);
+hxn_status hxn_gpu_vulkan_device_create_swapchain(hxn_handle *self, hxn_handle *surface, int32_t width, int32_t height, int32_t format, int32_t vsync, hxn_handle **out, hxn_buf *err);
 hxn_status hxn_gpu_vulkan_device_submit_and_wait(hxn_handle *self, hxn_handle *commands, hxn_buf *err);
 hxn_status hxn_gpu_vulkan_device_submit(hxn_handle *self, hxn_handle *commands, hxn_handle **out, hxn_buf *err);
 hxn_status hxn_gpu_vulkan_device_drop(hxn_handle *self, hxn_buf *err);
@@ -40,6 +45,14 @@ hxn_status hxn_gpu_vulkan_buffer_drop(hxn_handle *self, hxn_buf *err);
 hxn_status hxn_gpu_vulkan_image_width(hxn_handle *self, int32_t *out, hxn_buf *err);
 hxn_status hxn_gpu_vulkan_image_height(hxn_handle *self, int32_t *out, hxn_buf *err);
 hxn_status hxn_gpu_vulkan_image_drop(hxn_handle *self, hxn_buf *err);
+
+/* Swapchain */
+hxn_status hxn_gpu_vulkan_swapchain_width(hxn_handle *self, int32_t *out, hxn_buf *err);
+hxn_status hxn_gpu_vulkan_swapchain_height(hxn_handle *self, int32_t *out, hxn_buf *err);
+hxn_status hxn_gpu_vulkan_swapchain_acquire(hxn_handle *self, hxn_handle **out, hxn_buf *err);
+hxn_status hxn_gpu_vulkan_swapchain_present(hxn_handle *self, int32_t *out, hxn_buf *err);
+hxn_status hxn_gpu_vulkan_swapchain_resize(hxn_handle *self, int32_t width, int32_t height, hxn_buf *err);
+hxn_status hxn_gpu_vulkan_swapchain_drop(hxn_handle *self, hxn_buf *err);
 
 /* Sampler */
 hxn_status hxn_gpu_vulkan_sampler_drop(hxn_handle *self, hxn_buf *err);
