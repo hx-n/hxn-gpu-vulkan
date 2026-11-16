@@ -19,8 +19,8 @@ checksum = "4e7648175b45a9a48536d676f68d918270699102aa8dab5496df06904c914600"
 
 [[package]]
 name = "hxn"
-version = "0.3.2"
-source = "git+https://github.com/hx-n/hxn.git?tag=v0.3.2#ee1150b3c0b609c7e12fe1a455753adfd2c68387"
+version = "0.3.5"
+source = "git+https://github.com/hx-n/hxn.git?tag=v0.3.5#aafa0d817fd61ecda39b3fee03e941bdb5329ff4"
 dependencies = [
  "hxn-abi",
  "hxn-macros",
@@ -28,13 +28,13 @@ dependencies = [
 
 [[package]]
 name = "hxn-abi"
-version = "0.3.2"
-source = "git+https://github.com/hx-n/hxn.git?tag=v0.3.2#ee1150b3c0b609c7e12fe1a455753adfd2c68387"
+version = "0.3.5"
+source = "git+https://github.com/hx-n/hxn.git?tag=v0.3.5#aafa0d817fd61ecda39b3fee03e941bdb5329ff4"
 
 [[package]]
 name = "hxn-future"
-version = "0.3.2"
-source = "git+https://github.com/hx-n/hxn.git?tag=v0.3.2#ee1150b3c0b609c7e12fe1a455753adfd2c68387"
+version = "0.3.5"
+source = "git+https://github.com/hx-n/hxn.git?tag=v0.3.5#aafa0d817fd61ecda39b3fee03e941bdb5329ff4"
 dependencies = [
  "hxn-abi",
  "krio-core",
@@ -44,7 +44,7 @@ dependencies = [
 
 [[package]]
 name = "hxn-gpu-vulkan"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "ash",
  "hxn",
@@ -53,8 +53,8 @@ dependencies = [
 
 [[package]]
 name = "hxn-macros"
-version = "0.3.2"
-source = "git+https://github.com/hx-n/hxn.git?tag=v0.3.2#ee1150b3c0b609c7e12fe1a455753adfd2c68387"
+version = "0.3.5"
+source = "git+https://github.com/hx-n/hxn.git?tag=v0.3.5#aafa0d817fd61ecda39b3fee03e941bdb5329ff4"
 
 [[package]]
 name = "krio-core"

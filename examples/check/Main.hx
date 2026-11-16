@@ -1,4 +1,4 @@
-import gpu.vulkan.*;
+import hxn.gpu.vulkan.*;
 import haxe.io.Bytes;
 import Shaders;
 
@@ -45,7 +45,7 @@ class Main {
 
 	static function compute(device:Device, next:() -> Void) {
 		var module = device.createShaderModule(Tripled.spirv());
-		var sets = gpu.vulkan.Shaders.setLayouts(device, Tripled.LAYOUT);
+		var sets = hxn.gpu.vulkan.Shaders.setLayouts(device, Tripled.LAYOUT);
 		var layout = device.createPipelineLayout(sets);
 		var pipeline = device.createComputePipeline(module, "compute_main", layout);
 		var count = 64;
@@ -77,7 +77,7 @@ class Main {
 
 	static function render(device:Device) {
 		var module = device.createShaderModule(Tinted.spirv());
-		var sets = gpu.vulkan.Shaders.setLayouts(device, Tinted.LAYOUT);
+		var sets = hxn.gpu.vulkan.Shaders.setLayouts(device, Tinted.LAYOUT);
 		var layout = device.createPipelineLayout(sets);
 		var pipeline = device.createGraphicsPipeline(module, "vertex_main", module, "fragment_main", layout, Format.Rgba8Unorm, Topology.TriangleStrip,
 			[{binding: 0, stride: 8, perInstance: false}], [{location: Tinted.INPUT_position, binding: 0, format: Format.Rg32Float, offset: 0}]);

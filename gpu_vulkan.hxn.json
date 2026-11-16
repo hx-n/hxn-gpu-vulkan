@@ -1,7 +1,7 @@
 {
   "hxn": 1,
   "library": "gpu_vulkan",
-  "package": "gpu.vulkan",
+  "package": "hxn.gpu.vulkan",
   "enums": [
     {
       "name": "Format",

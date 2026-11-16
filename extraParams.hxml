@@ -1,2 +1,2 @@
 --macro hxn.Bind.lib("gpu_vulkan")
---macro gpu.vulkan.Shaders.register()
+--macro hxn.gpu.vulkan.Shaders.register()

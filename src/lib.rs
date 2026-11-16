@@ -11,7 +11,7 @@ use std::sync::{Arc, Mutex};
 use ash::vk;
 use hxn_future::Future;
 
-hxn::package!("gpu.vulkan");
+hxn::package!("hxn.gpu.vulkan");
 
 fn failed(what: &str, result: vk::Result) -> String {
     format!("{what}: {result}")

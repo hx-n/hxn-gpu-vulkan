@@ -1,5 +1,5 @@
 /** Each value becomes three times itself plus one. **/
-class Tripled implements gpu.vulkan.Shader {
+class Tripled implements hxn.gpu.vulkan.Shader {
 	static var SRC = {
 		@param var data : RWBuffer<Int>;
 
@@ -12,7 +12,7 @@ class Tripled implements gpu.vulkan.Shader {
 }
 
 /** Fills what it covers with `tint`. **/
-class Tinted implements gpu.vulkan.Shader {
+class Tinted implements hxn.gpu.vulkan.Shader {
 	static var SRC = {
 		@input var input : { position : Vec2 };
 		var output : { position : Vec4, color : Vec4 };

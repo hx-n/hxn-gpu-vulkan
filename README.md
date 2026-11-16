@@ -16,12 +16,12 @@ to SPIR-V at compile time. hxnsl's bind groups are the descriptor sets, and
 `LAYOUT` gives their layouts, so no shader reflection happens at run time.
 
 ```haxe
-import gpu.vulkan.*;
+import hxn.gpu.vulkan.*;
 
 var instance = Instance.create("my app");
 var device = instance.createDevice(0);
 var module = device.createShaderModule(Tripled.spirv());          // an hxnsl shader
-var sets = gpu.vulkan.Shaders.setLayouts(device, Tripled.LAYOUT);
+var sets = hxn.gpu.vulkan.Shaders.setLayouts(device, Tripled.LAYOUT);
 var layout = device.createPipelineLayout(sets);
 var pipeline = device.createComputePipeline(module, "compute_main", layout);
 var data = device.createBufferWith(input, BufferUsage.Storage);
@@ -57,7 +57,7 @@ needs no Rust. It needs a Vulkan driver and loader: on Linux, Mesa's drivers
 
 ## Classes
 
-All in the package `gpu.vulkan`:
+All in the package `hxn.gpu.vulkan`:
 
 | Class | |
 |---|---|
@@ -88,10 +88,10 @@ buffer is kept until then. `submitAndWait` is the blocking form.
 
 ## Shaders from hxnsl
 
-A shader for this driver implements `gpu.vulkan.Shader`, which extends
+A shader for this driver implements `hxn.gpu.vulkan.Shader`, which extends
 `hxnsl.Shader` and gets hxnsl's `spirv()` and `LAYOUT`. SPIR-V's entry points
 keep hxnsl's names: `vertex_main`, `fragment_main` and `compute_main`.
-`gpu.vulkan.Shaders.setLayouts(device, Shader.LAYOUT)` makes the descriptor
+`hxn.gpu.vulkan.Shaders.setLayouts(device, Shader.LAYOUT)` makes the descriptor
 set layouts of its bind groups.
 
 russl, which writes the SPIR-V, flips Y in the vertex stage, so images come
