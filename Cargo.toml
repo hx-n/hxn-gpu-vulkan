@@ -5,7 +5,7 @@ edition = "2024"
 description = "Vulkan for Haxe: devices, buffers, images, descriptor sets, pipelines and command buffers with explicit barriers"
 repository = "https://github.com/hx-n/hxn-gpu-vulkan"
 license = "Apache-2.0"
-keywords = ["vulkan", "gpu", "haxe", "graphics", "compute", "spirv", "linux", "windows", "android", "native"]
+keywords = ["vulkan", "gpu", "haxe", "graphics", "compute", "spirv", "linux", "windows", "android", "native", "hxcpp", "hashlink", "cross"]
 
 [lib]
 name = "hxn_gpu_vulkan"

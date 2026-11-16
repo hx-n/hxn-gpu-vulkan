@@ -4,7 +4,7 @@
   "description": "Vulkan for Haxe: devices, buffers, images, descriptor sets, pipelines and command buffers with explicit barriers",
   "url": "https://github.com/hx-n/hxn-gpu-vulkan",
   "license": "Apache",
-  "tags": ["vulkan", "gpu", "haxe", "graphics", "compute", "spirv", "linux", "windows", "android", "native"],
+  "tags": ["vulkan", "gpu", "haxe", "graphics", "compute", "spirv", "linux", "windows", "android", "native", "hxcpp", "hashlink", "cross"],
   "contributors": ["darmie", "rayzor"],
   "releasenote": "Presents to windows: Instance.createSurface on AppKit, UIKit, Win32, Xlib, Wayland and Android windows from hxn-window's handles, and Device.createSwapchain with acquire, present and resize.",
   "dependencies": { "hxn": "0.3.5" }
