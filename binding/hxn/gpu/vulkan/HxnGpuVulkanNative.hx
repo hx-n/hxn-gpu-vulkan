@@ -31,6 +31,8 @@ package hxn.gpu.vulkan;
 @:noCompletion class HxnGpuVulkanNative {
 	static function memory_held():Float;
 	static function memory_wanted():Bool;
+	static function log_level(level:Int):Void;
+	public static function log_take():Null<haxe.io.Bytes>;
 	static function instance_create(name:String):hxn.Handle;
 	static function instance_adapter_names(self:hxn.Handle):haxe.io.Bytes;
 	static function instance_create_device(self:hxn.Handle, index:Int):hxn.Handle;

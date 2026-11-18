@@ -2,9 +2,10 @@
 package hxn.gpu.vulkan;
 
 /** The descriptor set layouts of a pipeline, set 0 first. **/
+@:build(hxn.Log.bind())
 class SetLayouts {
 	@:noCompletion public var hxnRaw:hxn.Handle;
-	@:noCompletion static final hxnMemory = HxnGpuVulkanMemory.meter;
+	@:keep @:noCompletion static final hxnMemory = HxnGpuVulkanMemory.meter;
 
 	/** An object for a value the library returned. **/
 	@:noCompletion public static function hxnAdopt(hxnRaw:hxn.Handle):SetLayouts {

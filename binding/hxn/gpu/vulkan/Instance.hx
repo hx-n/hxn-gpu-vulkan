@@ -2,9 +2,10 @@
 package hxn.gpu.vulkan;
 
 /** A Vulkan instance: the loader, and the GPUs it finds. **/
+@:build(hxn.Log.bind())
 class Instance {
 	@:noCompletion public var hxnRaw:hxn.Handle;
-	@:noCompletion static final hxnMemory = HxnGpuVulkanMemory.meter;
+	@:keep @:noCompletion static final hxnMemory = HxnGpuVulkanMemory.meter;
 
 	/** An object for a value the library returned. **/
 	@:noCompletion public static function hxnAdopt(hxnRaw:hxn.Handle):Instance {

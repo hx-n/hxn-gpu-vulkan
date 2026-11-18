@@ -312,6 +312,7 @@ impl Instance {
     /// An instance for the application `name`. Fails where no Vulkan loader or driver is
     /// installed. Asks for Vulkan 1.3, which the driver may lower.
     pub fn create(name: &str) -> Result<Instance, String> {
+        hxn::log::debug!(target: "hxn.gpu.vulkan", "opening a Vulkan instance");
         let entry = unsafe { ash::Entry::load() }.map_err(|e| format!("no Vulkan loader: {e}"))?;
         let available = unsafe { entry.enumerate_instance_extension_properties(None) }
             .map_err(|e| failed("listing instance extensions", e))?;

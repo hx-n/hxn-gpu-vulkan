@@ -2,9 +2,10 @@
 package hxn.gpu.vulkan;
 
 /** A logical device and its queue; every other object comes from one. **/
+@:build(hxn.Log.bind())
 class Device {
 	@:noCompletion public var hxnRaw:hxn.Handle;
-	@:noCompletion static final hxnMemory = HxnGpuVulkanMemory.meter;
+	@:keep @:noCompletion static final hxnMemory = HxnGpuVulkanMemory.meter;
 
 	/** An object for a value the library returned. **/
 	@:noCompletion public static function hxnAdopt(hxnRaw:hxn.Handle):Device {

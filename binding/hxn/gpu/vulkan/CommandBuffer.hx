@@ -2,9 +2,10 @@
 package hxn.gpu.vulkan;
 
 /** Records commands until a `Device.submit`. Not thread-safe: its methods take `&mut self`. **/
+@:build(hxn.Log.bind())
 class CommandBuffer {
 	@:noCompletion public var hxnRaw:hxn.Handle;
-	@:noCompletion static final hxnMemory = HxnGpuVulkanMemory.meter;
+	@:keep @:noCompletion static final hxnMemory = HxnGpuVulkanMemory.meter;
 
 	/** An object for a value the library returned. **/
 	@:noCompletion public static function hxnAdopt(hxnRaw:hxn.Handle):CommandBuffer {

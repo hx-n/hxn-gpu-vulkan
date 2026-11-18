@@ -7,5 +7,6 @@ package hxn.gpu.vulkan;
 	a delivery does.
 **/
 class HxnGpuVulkanMemory {
+	@:keep static final logging = hxn.Log.attach(level -> HxnGpuVulkanNative.log_level(level), () -> HxnGpuVulkanNative.log_take());
 	public static final meter = new hxn.Gc.Meter(() -> HxnGpuVulkanNative.memory_held(), () -> HxnGpuVulkanNative.memory_wanted());
 }

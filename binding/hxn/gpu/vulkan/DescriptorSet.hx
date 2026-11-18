@@ -2,9 +2,10 @@
 package hxn.gpu.vulkan;
 
 /** A descriptor set, written binding by binding before a command buffer binds it. **/
+@:build(hxn.Log.bind())
 class DescriptorSet {
 	@:noCompletion public var hxnRaw:hxn.Handle;
-	@:noCompletion static final hxnMemory = HxnGpuVulkanMemory.meter;
+	@:keep @:noCompletion static final hxnMemory = HxnGpuVulkanMemory.meter;
 
 	/** An object for a value the library returned. **/
 	@:noCompletion public static function hxnAdopt(hxnRaw:hxn.Handle):DescriptorSet {
