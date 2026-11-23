@@ -551,10 +551,37 @@
           "blocking": false
         },
         {
+          "name": "set_viewport",
+          "docs": "Maps clip space onto the `width` by `height` pixels at `x`, `y` of the target.",
+          "kind": "mutating",
+          "params": [{ "name": "x", "type": "f64" }, { "name": "y", "type": "f64" }, { "name": "width", "type": "f64" }, { "name": "height", "type": "f64" }],
+          "returns": "void",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "set_scissor",
+          "docs": "Draws only inside the `width` by `height` pixels at `x`, `y` of the target.",
+          "kind": "mutating",
+          "params": [{ "name": "x", "type": "i32" }, { "name": "y", "type": "i32" }, { "name": "width", "type": "i32" }, { "name": "height", "type": "i32" }],
+          "returns": "void",
+          "fallible": true,
+          "blocking": false
+        },
+        {
           "name": "draw",
           "docs": "Draws `count` vertices from `first`, `instances` times.",
           "kind": "mutating",
           "params": [{ "name": "count", "type": "i32" }, { "name": "instances", "type": "i32" }, { "name": "first", "type": "i32" }],
+          "returns": "void",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "copy_buffer_to_image",
+          "docs": "Copies `buffer` into the `width` by `height` pixels at `x`, `y` of `image`, which must be\nin the transfer destination layout. Rows in `buffer` are `row_length` pixels apart, or\npacked when it is 0.",
+          "kind": "mutating",
+          "params": [{ "name": "buffer", "type": "Buffer" }, { "name": "image", "type": "Image" }, { "name": "x", "type": "i32" }, { "name": "y", "type": "i32" }, { "name": "width", "type": "i32" }, { "name": "height", "type": "i32" }, { "name": "row_length", "type": "i32" }],
           "returns": "void",
           "fallible": true,
           "blocking": false

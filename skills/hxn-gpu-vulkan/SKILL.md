@@ -64,6 +64,11 @@ commands.copyImageToBuffer(target, readback);
 commands.bufferBarrier(readback, Stage.Transfer, Access.TransferWrite, Stage.Host, Access.HostRead);
 ```
 
+Inside a rendering, `setViewport(x, y, w, h)` and `setScissor(x, y, w, h)` take
+pixels from the image's top-left corner, and `LoadOp.Load` keeps what the image
+holds. `copyBufferToImage(buffer, image, x, y, w, h, rowLength)` writes part of an
+image in `Layout.TransferDst`, from rows `rowLength` pixels apart, or packed with 0.
+
 ## Windows
 
 `instance.createSurface(window.platform(), window.raw(0), window.raw(1), window.raw(2), window.raw(3))`

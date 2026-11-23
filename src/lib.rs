@@ -1960,6 +1960,40 @@ impl CommandBuffer {
         Ok(())
     }
 
+    /// Maps clip space onto the `width` by `height` pixels at `x`, `y` of the target.
+    pub fn set_viewport(&mut self, x: f64, y: f64, width: f64, height: f64) -> Result<(), String> {
+        let cb = self.recording()?;
+        unsafe {
+            self.recorded.shared.device.cmd_set_viewport(
+                cb,
+                0,
+                &[vk::Viewport {
+                    x: x as f32,
+                    y: y as f32,
+                    width: width as f32,
+                    height: height as f32,
+                    min_depth: 0.0,
+                    max_depth: 1.0,
+                }],
+            )
+        };
+        Ok(())
+    }
+
+    /// Draws only inside the `width` by `height` pixels at `x`, `y` of the target.
+    pub fn set_scissor(&mut self, x: i32, y: i32, width: i32, height: i32) -> Result<(), String> {
+        let cb = self.recording()?;
+        let area = vk::Rect2D {
+            offset: vk::Offset2D { x, y },
+            extent: vk::Extent2D {
+                width: u32_of(width, "a width")?,
+                height: u32_of(height, "a height")?,
+            },
+        };
+        unsafe { self.recorded.shared.device.cmd_set_scissor(cb, 0, &[area]) };
+        Ok(())
+    }
+
     /// Draws `count` vertices from `first`, `instances` times.
     pub fn draw(&mut self, count: i32, instances: i32, first: i32) -> Result<(), String> {
         let cb = self.recording()?;
@@ -1970,6 +2004,50 @@ impl CommandBuffer {
                 u32_of(instances, "an instance count")?,
                 u32_of(first, "a first vertex")?,
                 0,
+            )
+        };
+        Ok(())
+    }
+
+    /// Copies `buffer` into the `width` by `height` pixels at `x`, `y` of `image`, which must be
+    /// in the transfer destination layout. Rows in `buffer` are `row_length` pixels apart, or
+    /// packed when it is 0.
+    #[allow(clippy::too_many_arguments)]
+    pub fn copy_buffer_to_image(
+        &mut self,
+        buffer: &Buffer,
+        image: &Image,
+        x: i32,
+        y: i32,
+        width: i32,
+        height: i32,
+        row_length: i32,
+    ) -> Result<(), String> {
+        let cb = self.recording()?;
+        let region = vk::BufferImageCopy {
+            buffer_offset: 0,
+            buffer_row_length: u32_of(row_length, "a row length")?,
+            buffer_image_height: 0,
+            image_subresource: vk::ImageSubresourceLayers {
+                aspect_mask: image.aspect,
+                mip_level: 0,
+                base_array_layer: 0,
+                layer_count: 1,
+            },
+            image_offset: vk::Offset3D { x, y, z: 0 },
+            image_extent: vk::Extent3D {
+                width: u32_of(width, "a width")?,
+                height: u32_of(height, "a height")?,
+                depth: 1,
+            },
+        };
+        unsafe {
+            self.recorded.shared.device.cmd_copy_buffer_to_image(
+                cb,
+                buffer.buffer,
+                image.image,
+                vk::ImageLayout::TRANSFER_DST_OPTIMAL,
+                &[region],
             )
         };
         Ok(())

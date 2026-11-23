@@ -368,9 +368,24 @@ inline void command_buffer_bind_vertex_buffer(void *self, int binding, void *buf
 	hxn::check(hxn_gpu_vulkan_command_buffer_bind_vertex_buffer((hxn_handle *)self, binding, (hxn_handle *)buffer, offset, &err), err);
 }
 
+inline void command_buffer_set_viewport(void *self, double x, double y, double width, double height) {
+	hxn_buf err = HXN_BUF_EMPTY;
+	hxn::check(hxn_gpu_vulkan_command_buffer_set_viewport((hxn_handle *)self, x, y, width, height, &err), err);
+}
+
+inline void command_buffer_set_scissor(void *self, int x, int y, int width, int height) {
+	hxn_buf err = HXN_BUF_EMPTY;
+	hxn::check(hxn_gpu_vulkan_command_buffer_set_scissor((hxn_handle *)self, x, y, width, height, &err), err);
+}
+
 inline void command_buffer_draw(void *self, int count, int instances, int first) {
 	hxn_buf err = HXN_BUF_EMPTY;
 	hxn::check(hxn_gpu_vulkan_command_buffer_draw((hxn_handle *)self, count, instances, first, &err), err);
+}
+
+inline void command_buffer_copy_buffer_to_image(void *self, void *buffer, void *image, int x, int y, int width, int height, int row_length) {
+	hxn_buf err = HXN_BUF_EMPTY;
+	hxn::check(hxn_gpu_vulkan_command_buffer_copy_buffer_to_image((hxn_handle *)self, (hxn_handle *)buffer, (hxn_handle *)image, x, y, width, height, row_length, &err), err);
 }
 
 inline void command_buffer_copy_image_to_buffer(void *self, void *image, void *buffer) {

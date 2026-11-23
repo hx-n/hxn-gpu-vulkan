@@ -53,9 +53,25 @@ class CommandBuffer {
 	public function bindVertexBuffer(binding:Int, buffer:Buffer, offset:haxe.Int64):Void
 		HxnGpuVulkanNative.command_buffer_bind_vertex_buffer(hxnRaw, binding, buffer == null ? null : buffer.hxnRaw, offset);
 
+	/** Maps clip space onto the `width` by `height` pixels at `x`, `y` of the target. **/
+	public function setViewport(x:Float, y:Float, width:Float, height:Float):Void
+		HxnGpuVulkanNative.command_buffer_set_viewport(hxnRaw, x, y, width, height);
+
+	/** Draws only inside the `width` by `height` pixels at `x`, `y` of the target. **/
+	public function setScissor(x:Int, y:Int, width:Int, height:Int):Void
+		HxnGpuVulkanNative.command_buffer_set_scissor(hxnRaw, x, y, width, height);
+
 	/** Draws `count` vertices from `first`, `instances` times. **/
 	public function draw(count:Int, instances:Int, first:Int):Void
 		HxnGpuVulkanNative.command_buffer_draw(hxnRaw, count, instances, first);
+
+	/**
+		Copies `buffer` into the `width` by `height` pixels at `x`, `y` of `image`, which must be
+		in the transfer destination layout. Rows in `buffer` are `row_length` pixels apart, or
+		packed when it is 0.
+	**/
+	public function copyBufferToImage(buffer:Buffer, image:Image, x:Int, y:Int, width:Int, height:Int, rowLength:Int):Void
+		HxnGpuVulkanNative.command_buffer_copy_buffer_to_image(hxnRaw, buffer == null ? null : buffer.hxnRaw, image == null ? null : image.hxnRaw, x, y, width, height, rowLength);
 
 	/**
 		Copies all of `image`, which must be in the transfer source layout, into `buffer`, rows

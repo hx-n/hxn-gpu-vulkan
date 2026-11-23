@@ -86,7 +86,10 @@ hxn_status hxn_gpu_vulkan_command_buffer_memory_barrier(hxn_handle *self, int32_
 hxn_status hxn_gpu_vulkan_command_buffer_begin_rendering(hxn_handle *self, hxn_handle *target, int32_t load, double red, double green, double blue, double alpha, hxn_buf *err);
 hxn_status hxn_gpu_vulkan_command_buffer_end_rendering(hxn_handle *self, hxn_buf *err);
 hxn_status hxn_gpu_vulkan_command_buffer_bind_vertex_buffer(hxn_handle *self, int32_t binding, hxn_handle *buffer, int64_t offset, hxn_buf *err);
+hxn_status hxn_gpu_vulkan_command_buffer_set_viewport(hxn_handle *self, double x, double y, double width, double height, hxn_buf *err);
+hxn_status hxn_gpu_vulkan_command_buffer_set_scissor(hxn_handle *self, int32_t x, int32_t y, int32_t width, int32_t height, hxn_buf *err);
 hxn_status hxn_gpu_vulkan_command_buffer_draw(hxn_handle *self, int32_t count, int32_t instances, int32_t first, hxn_buf *err);
+hxn_status hxn_gpu_vulkan_command_buffer_copy_buffer_to_image(hxn_handle *self, hxn_handle *buffer, hxn_handle *image, int32_t x, int32_t y, int32_t width, int32_t height, int32_t row_length, hxn_buf *err);
 hxn_status hxn_gpu_vulkan_command_buffer_copy_image_to_buffer(hxn_handle *self, hxn_handle *image, hxn_handle *buffer, hxn_buf *err);
 hxn_status hxn_gpu_vulkan_command_buffer_drop(hxn_handle *self, hxn_buf *err);
 
