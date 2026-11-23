@@ -130,12 +130,12 @@ inline void *device_create_compute_pipeline(void *self, void *module, ::String e
 	return out;
 }
 
-inline void *device_create_graphics_pipeline(void *self, void *vertex, ::String vertex_entry, void *fragment, ::String fragment_entry, void *layout, int format, int topology, Array<unsigned char> bindings, Array<unsigned char> attributes) {
+inline void *device_create_graphics_pipeline(void *self, void *vertex, ::String vertex_entry, void *fragment, ::String fragment_entry, void *layout, int format, int topology, Array<unsigned char> bindings, Array<unsigned char> attributes, Array<unsigned char> blend) {
 	hx::strbuf vertex_entry_storage;
 	hx::strbuf fragment_entry_storage;
 	hxn_handle *out = 0;
 	hxn_buf err = HXN_BUF_EMPTY;
-	hxn::check(hxn_gpu_vulkan_device_create_graphics_pipeline((hxn_handle *)self, (hxn_handle *)vertex, hxn::slice(vertex_entry, vertex_entry_storage), (hxn_handle *)fragment, hxn::slice(fragment_entry, fragment_entry_storage), (hxn_handle *)layout, format, topology, hxn::slice(bindings), hxn::slice(attributes), &out, &err), err);
+	hxn::check(hxn_gpu_vulkan_device_create_graphics_pipeline((hxn_handle *)self, (hxn_handle *)vertex, hxn::slice(vertex_entry, vertex_entry_storage), (hxn_handle *)fragment, hxn::slice(fragment_entry, fragment_entry_storage), (hxn_handle *)layout, format, topology, hxn::slice(bindings), hxn::slice(attributes), hxn::slice(blend), &out, &err), err);
 	return out;
 }
 
