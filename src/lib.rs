@@ -300,6 +300,51 @@ pub enum AddressMode {
     ClampToEdge = 2,
 }
 
+/// How a pipeline blends what it draws into its color attachment. The factors are hxn-gpu's
+/// shared codes, from 0 `Zero` to 10 `SrcAlphaSaturated`, and the operations from 0 `Add` to
+/// 4 `Max`, as `VkBlendOp` numbers them. With `enabled` false, the pipeline writes its color
+/// as it is.
+#[hxn::data]
+pub struct Blend {
+    pub enabled: bool,
+    pub color_operation: i32,
+    pub color_source: i32,
+    pub color_destination: i32,
+    pub alpha_operation: i32,
+    pub alpha_source: i32,
+    pub alpha_destination: i32,
+}
+
+// The Vulkan factor of each shared code, in the order of hxn-gpu's `BlendFactor`.
+const BLEND_FACTORS: [vk::BlendFactor; 11] = [
+    vk::BlendFactor::ZERO,
+    vk::BlendFactor::ONE,
+    vk::BlendFactor::SRC_COLOR,
+    vk::BlendFactor::ONE_MINUS_SRC_COLOR,
+    vk::BlendFactor::SRC_ALPHA,
+    vk::BlendFactor::ONE_MINUS_SRC_ALPHA,
+    vk::BlendFactor::DST_COLOR,
+    vk::BlendFactor::ONE_MINUS_DST_COLOR,
+    vk::BlendFactor::DST_ALPHA,
+    vk::BlendFactor::ONE_MINUS_DST_ALPHA,
+    vk::BlendFactor::SRC_ALPHA_SATURATE,
+];
+
+fn blend_factor(code: i32, what: &str) -> Result<vk::BlendFactor, String> {
+    usize::try_from(code)
+        .ok()
+        .and_then(|i| BLEND_FACTORS.get(i).copied())
+        .ok_or_else(|| format!("{what} is {code}, and a blend factor is 0 to 10"))
+}
+
+fn blend_operation(code: i32, what: &str) -> Result<vk::BlendOp, String> {
+    if (0..=4).contains(&code) {
+        Ok(vk::BlendOp::from_raw(code))
+    } else {
+        Err(format!("{what} is {code}, and a blend operation is 0 to 4"))
+    }
+}
+
 /// A Vulkan instance: the loader, and the GPUs it finds.
 #[hxn::interface]
 pub struct Instance {
@@ -860,7 +905,7 @@ impl Device {
     }
 
     /// A graphics pipeline for dynamic rendering into one color attachment of `format`, with a
-    /// dynamic viewport and scissor, no blending and no culling.
+    /// dynamic viewport and scissor, blending as `blend` describes, and no culling.
     #[allow(clippy::too_many_arguments)]
     pub fn create_graphics_pipeline(
         &self,
@@ -873,6 +918,7 @@ impl Device {
         topology: Topology,
         bindings: Vec<VertexBinding>,
         attributes: Vec<VertexAttribute>,
+        blend: Blend,
     ) -> Result<Pipeline, String> {
         let vertex_name =
             CString::new(vertex_entry).map_err(|_| "an entry point contains a NUL")?;
@@ -928,8 +974,31 @@ impl Device {
             .line_width(1.0);
         let multisample = vk::PipelineMultisampleStateCreateInfo::default()
             .rasterization_samples(vk::SampleCountFlags::TYPE_1);
-        let blend_attachments = [vk::PipelineColorBlendAttachmentState::default()
-            .color_write_mask(vk::ColorComponentFlags::RGBA)];
+        let mut attachment = vk::PipelineColorBlendAttachmentState::default()
+            .color_write_mask(vk::ColorComponentFlags::RGBA);
+        if blend.enabled {
+            attachment = attachment
+                .blend_enable(true)
+                .color_blend_op(blend_operation(
+                    blend.color_operation,
+                    "the color operation",
+                )?)
+                .src_color_blend_factor(blend_factor(blend.color_source, "the color source")?)
+                .dst_color_blend_factor(blend_factor(
+                    blend.color_destination,
+                    "the color destination",
+                )?)
+                .alpha_blend_op(blend_operation(
+                    blend.alpha_operation,
+                    "the alpha operation",
+                )?)
+                .src_alpha_blend_factor(blend_factor(blend.alpha_source, "the alpha source")?)
+                .dst_alpha_blend_factor(blend_factor(
+                    blend.alpha_destination,
+                    "the alpha destination",
+                )?);
+        }
+        let blend_attachments = [attachment];
         let blend =
             vk::PipelineColorBlendStateCreateInfo::default().attachments(&blend_attachments);
         let dynamic_states = [vk::DynamicState::VIEWPORT, vk::DynamicState::SCISSOR];

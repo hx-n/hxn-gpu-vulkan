@@ -72,6 +72,18 @@ Each frame: `var image = swapchain.acquire()`, render into it, barrier it to
 `Layout.Present`, submit, then `if (!swapchain.present()) swapchain.resize(w, h)`.
 The images take the window's size in pixels: read `swapchain.width()`.
 
+## Blending
+
+`device.createGraphicsPipeline` takes a `Blend` record last: `enabled`, then
+the operation and the source and destination factors of the color and of the
+alpha. The factors are hxn-gpu's shared codes: 0 `Zero`, 1 `One`, 2 `Src`,
+3 `OneMinusSrc`, 4 `SrcAlpha`, 5 `OneMinusSrcAlpha`, 6 `Dst`, 7 `OneMinusDst`,
+8 `DstAlpha`, 9 `OneMinusDstAlpha` and 10 `SrcAlphaSaturated`. The operations
+are 0 `Add`, 1 `Subtract`, 2 `ReverseSubtract`, 3 `Min` and 4 `Max`. Straight
+alpha is `{enabled: true, colorOperation: 0, colorSource: 4, colorDestination: 5,
+alphaOperation: 0, alphaSource: 1, alphaDestination: 5}`, and `enabled: false`
+writes the color as it is.
+
 ## Rules
 
 - Synchronization is explicit. Record a barrier between a write and any

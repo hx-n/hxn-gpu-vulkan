@@ -108,6 +108,19 @@
         { "name": "stride", "type": "i32" },
         { "name": "per_instance", "type": "bool" }
       ]
+    },
+    {
+      "name": "Blend",
+      "docs": "How a pipeline blends what it draws into its color attachment. The factors are hxn-gpu's\nshared codes, from 0 `Zero` to 10 `SrcAlphaSaturated`, and the operations from 0 `Add` to\n4 `Max`, as `VkBlendOp` numbers them. With `enabled` false, the pipeline writes its color\nas it is.",
+      "fields": [
+        { "name": "enabled", "type": "bool" },
+        { "name": "color_operation", "type": "i32" },
+        { "name": "color_source", "type": "i32" },
+        { "name": "color_destination", "type": "i32" },
+        { "name": "alpha_operation", "type": "i32" },
+        { "name": "alpha_source", "type": "i32" },
+        { "name": "alpha_destination", "type": "i32" }
+      ]
     }
   ],
   "interfaces": [
@@ -244,9 +257,9 @@
         },
         {
           "name": "create_graphics_pipeline",
-          "docs": "A graphics pipeline for dynamic rendering into one color attachment of `format`, with a\ndynamic viewport and scissor, no blending and no culling.",
+          "docs": "A graphics pipeline for dynamic rendering into one color attachment of `format`, with a\ndynamic viewport and scissor, blending as `blend` describes, and no culling.",
           "kind": "method",
-          "params": [{ "name": "vertex", "type": "ShaderModule" }, { "name": "vertex_entry", "type": "str" }, { "name": "fragment", "type": "ShaderModule" }, { "name": "fragment_entry", "type": "str" }, { "name": "layout", "type": "PipelineLayout" }, { "name": "format", "type": "Format" }, { "name": "topology", "type": "Topology" }, { "name": "bindings", "type": "list<VertexBinding>" }, { "name": "attributes", "type": "list<VertexAttribute>" }],
+          "params": [{ "name": "vertex", "type": "ShaderModule" }, { "name": "vertex_entry", "type": "str" }, { "name": "fragment", "type": "ShaderModule" }, { "name": "fragment_entry", "type": "str" }, { "name": "layout", "type": "PipelineLayout" }, { "name": "format", "type": "Format" }, { "name": "topology", "type": "Topology" }, { "name": "bindings", "type": "list<VertexBinding>" }, { "name": "attributes", "type": "list<VertexAttribute>" }, { "name": "blend", "type": "Blend" }],
           "returns": "Pipeline",
           "fallible": true,
           "blocking": false

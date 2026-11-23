@@ -68,9 +68,9 @@ class Device {
 
 	/**
 		A graphics pipeline for dynamic rendering into one color attachment of `format`, with a
-		dynamic viewport and scissor, no blending and no culling.
+		dynamic viewport and scissor, blending as `blend` describes, and no culling.
 	**/
-	public function createGraphicsPipeline(vertex:ShaderModule, vertexEntry:String, fragment:ShaderModule, fragmentEntry:String, layout:PipelineLayout, format:Format, topology:Topology, bindings:Array<VertexBinding>, attributes:Array<VertexAttribute>):Pipeline {
+	public function createGraphicsPipeline(vertex:ShaderModule, vertexEntry:String, fragment:ShaderModule, fragmentEntry:String, layout:PipelineLayout, format:Format, topology:Topology, bindings:Array<VertexBinding>, attributes:Array<VertexAttribute>, blend:Blend):Pipeline {
 		var bindingsOut = new haxe.io.BytesBuffer();
 		if (bindings == null)
 			throw new haxe.Exception("null where a list is needed");
@@ -91,7 +91,12 @@ class Device {
 			item0.hxnWrite(attributesOut);
 		}
 		var attributesBytes = attributesOut.getBytes();
-		return Pipeline.hxnAdopt(HxnGpuVulkanNative.device_create_graphics_pipeline(hxnRaw, vertex == null ? null : vertex.hxnRaw, vertexEntry, fragment == null ? null : fragment.hxnRaw, fragmentEntry, layout == null ? null : layout.hxnRaw, format, topology, bindingsBytes, attributesBytes));
+		var blendOut = new haxe.io.BytesBuffer();
+		if (blend == null)
+			throw new haxe.Exception("null where a Blend is needed");
+		blend.hxnWrite(blendOut);
+		var blendBytes = blendOut.getBytes();
+		return Pipeline.hxnAdopt(HxnGpuVulkanNative.device_create_graphics_pipeline(hxnRaw, vertex == null ? null : vertex.hxnRaw, vertexEntry, fragment == null ? null : fragment.hxnRaw, fragmentEntry, layout == null ? null : layout.hxnRaw, format, topology, bindingsBytes, attributesBytes, blendBytes));
 	}
 
 	/** A primary command buffer, from a pool of its own, ready to record. **/

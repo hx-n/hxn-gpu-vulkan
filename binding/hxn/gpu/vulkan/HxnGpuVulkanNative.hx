@@ -48,7 +48,7 @@ package hxn.gpu.vulkan;
 	static function device_create_pipeline_layout(self:hxn.Handle, sets:hxn.Handle):hxn.Handle;
 	static function device_create_descriptor_set(self:hxn.Handle, sets:hxn.Handle, index:Int):hxn.Handle;
 	static function device_create_compute_pipeline(self:hxn.Handle, module:hxn.Handle, entry:String, layout:hxn.Handle):hxn.Handle;
-	static function device_create_graphics_pipeline(self:hxn.Handle, vertex:hxn.Handle, vertexEntry:String, fragment:hxn.Handle, fragmentEntry:String, layout:hxn.Handle, format:Int, topology:Int, bindings:haxe.io.Bytes, attributes:haxe.io.Bytes):hxn.Handle;
+	static function device_create_graphics_pipeline(self:hxn.Handle, vertex:hxn.Handle, vertexEntry:String, fragment:hxn.Handle, fragmentEntry:String, layout:hxn.Handle, format:Int, topology:Int, bindings:haxe.io.Bytes, attributes:haxe.io.Bytes, blend:haxe.io.Bytes):hxn.Handle;
 	static function device_create_command_buffer(self:hxn.Handle):hxn.Handle;
 	static function device_create_swapchain(self:hxn.Handle, surface:hxn.Handle, width:Int, height:Int, format:Int, vsync:Bool):hxn.Handle;
 	static function device_submit_and_wait(self:hxn.Handle, commands:hxn.Handle):Void;
