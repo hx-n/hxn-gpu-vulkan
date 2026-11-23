@@ -15,7 +15,7 @@ name = "hxn_gpu_vulkan"
 library = "gpu_vulkan"
 haxelib = "hxn-gpu-vulkan"
 contributors = ["darmie", "rayzor"]
-releasenote = "Blend what a render pipeline draws into its target."
+releasenote = "Blend what a pipeline draws, write textures, and set the viewport and scissor inside a rendering."
 # The check `hxn check` and `hxn run` build.
 haxe = "examples/check"
 haxe-flags = ["-lib", "hxnsl"]

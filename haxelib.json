@@ -6,6 +6,6 @@
   "license": "Apache",
   "tags": ["vulkan", "gpu", "haxe", "graphics", "compute", "spirv", "linux", "windows", "android", "native", "hxcpp", "hashlink", "cross"],
   "contributors": ["darmie", "rayzor"],
-  "releasenote": "Blend what a render pipeline draws into its target.",
+  "releasenote": "Blend what a pipeline draws, write textures, and set the viewport and scissor inside a rendering.",
   "dependencies": { "hxn": "0.3.9" }
 }
