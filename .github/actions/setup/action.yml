@@ -71,7 +71,7 @@ runs:
         esac
         mkdir -p "$RUNNER_TEMP/ash"
         # Extracted in place: tar reads a Windows path's drive as a host.
-        (cd "$RUNNER_TEMP/ash" && curl -fsSL "https://github.com/rayzor-blade/ash/releases/download/v0.1.18/$archive" | tar -xz)
+        (cd "$RUNNER_TEMP/ash" && curl -fsSL "https://github.com/rayzor-blade/ash/releases/download/v0.1.22/$archive" | tar -xz)
         if [ "$RUNNER_OS" = Windows ]; then
           cygpath -w "$RUNNER_TEMP/ash" >> "$GITHUB_PATH"
         else

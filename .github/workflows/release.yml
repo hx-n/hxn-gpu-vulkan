@@ -129,7 +129,7 @@ jobs:
           esac
           mkdir -p "$RUNNER_TEMP/ash"
           # Extracted in place: tar reads a Windows path's drive as a host.
-          (cd "$RUNNER_TEMP/ash" && curl -fsSL "https://github.com/rayzor-blade/ash/releases/download/v0.1.18/$archive" | tar -xz)
+          (cd "$RUNNER_TEMP/ash" && curl -fsSL "https://github.com/rayzor-blade/ash/releases/download/v0.1.22/$archive" | tar -xz)
           echo "ASH=$RUNNER_TEMP/ash/ash" >> "$GITHUB_ENV"
       - name: Build and run on Ash and hxcpp
         working-directory: examples/check

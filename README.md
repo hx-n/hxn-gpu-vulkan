@@ -56,6 +56,7 @@ ARM64, Windows on x86-64 and macOS on Apple silicon, for HashLink and hxcpp,
 and as static libraries for hxcpp on Intel Macs and for Android. A program
 needs no Rust. It needs a Vulkan driver and loader: on Linux, Mesa's drivers
 (`libvulkan1 mesa-vulkan-drivers`); on macOS, MoltenVK from the Vulkan SDK.
+On Ash, it needs Ash 0.1.22 or later.
 
 ## Classes
 

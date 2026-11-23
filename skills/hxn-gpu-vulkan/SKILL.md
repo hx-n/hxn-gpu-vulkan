@@ -18,7 +18,7 @@ Prebuilt for Linux x86-64 and ARM64, Windows x86-64 and Apple-silicon macOS
 (HashLink and hxcpp), Intel Macs and Android (hxcpp). A program needs a
 Vulkan driver and loader: on Linux `libvulkan1 mesa-vulkan-drivers`, on macOS
 MoltenVK (set `DYLD_FALLBACK_LIBRARY_PATH=/usr/local/lib` if the loader is
-not found).
+not found). On Ash, it needs Ash 0.1.22 or later.
 
 ## Use
 
