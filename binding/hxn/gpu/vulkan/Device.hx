@@ -100,6 +100,48 @@ class Device {
 		return Pipeline.hxnAdopt(HxnGpuVulkanNative.device_create_graphics_pipeline(hxnRaw, vertex == null ? null : vertex.hxnRaw, vertexEntry, fragment == null ? null : fragment.hxnRaw, fragmentEntry, layout == null ? null : layout.hxnRaw, format, topology, bindingsBytes, attributesBytes, blendBytes));
 	}
 
+	/**
+		Creates a graphics pipeline for dynamic rendering into the color attachments of
+		`targets`, in the order of the fragment shader's outputs. With `has_depth`, it tests
+		depth in an attachment of `depth`: the test passes when `compare` holds between a
+		fragment's depth and the attachment's, with `VkCompareOp`'s values from 0 `Never` to 7
+		`Always`, which hxn-gpu's drivers share, and with `write` a fragment that passes writes
+		its depth. The pipeline has a dynamic viewport and scissor, and does no culling.
+	**/
+	public function createGraphicsPipelineWith(vertex:ShaderModule, vertexEntry:String, fragment:ShaderModule, fragmentEntry:String, layout:PipelineLayout, targets:Array<ColorTarget>, hasDepth:Bool, depth:Format, compare:Int, write:Bool, topology:Topology, bindings:Array<VertexBinding>, attributes:Array<VertexAttribute>):Pipeline {
+		var targetsOut = new haxe.io.BytesBuffer();
+		if (targets == null)
+			throw new haxe.Exception("null where a list is needed");
+		targetsOut.addInt32(targets.length);
+		for (item0 in targets) {
+			if (item0 == null)
+				throw new haxe.Exception("null where a ColorTarget is needed");
+			item0.hxnWrite(targetsOut);
+		}
+		var targetsBytes = targetsOut.getBytes();
+		var bindingsOut = new haxe.io.BytesBuffer();
+		if (bindings == null)
+			throw new haxe.Exception("null where a list is needed");
+		bindingsOut.addInt32(bindings.length);
+		for (item0 in bindings) {
+			if (item0 == null)
+				throw new haxe.Exception("null where a VertexBinding is needed");
+			item0.hxnWrite(bindingsOut);
+		}
+		var bindingsBytes = bindingsOut.getBytes();
+		var attributesOut = new haxe.io.BytesBuffer();
+		if (attributes == null)
+			throw new haxe.Exception("null where a list is needed");
+		attributesOut.addInt32(attributes.length);
+		for (item0 in attributes) {
+			if (item0 == null)
+				throw new haxe.Exception("null where a VertexAttribute is needed");
+			item0.hxnWrite(attributesOut);
+		}
+		var attributesBytes = attributesOut.getBytes();
+		return Pipeline.hxnAdopt(HxnGpuVulkanNative.device_create_graphics_pipeline_with(hxnRaw, vertex == null ? null : vertex.hxnRaw, vertexEntry, fragment == null ? null : fragment.hxnRaw, fragmentEntry, layout == null ? null : layout.hxnRaw, targetsBytes, hasDepth, depth, compare, write, topology, bindingsBytes, attributesBytes));
+	}
+
 	/** A primary command buffer, from a pool of its own, ready to record. **/
 	public function createCommandBuffer():CommandBuffer
 		return CommandBuffer.hxnAdopt(HxnGpuVulkanNative.device_create_command_buffer(hxnRaw));

@@ -1,11 +1,11 @@
 {
   "name": "hxn-gpu-vulkan",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Vulkan for Haxe: devices, buffers, images, descriptor sets, pipelines and command buffers with explicit barriers",
   "url": "https://github.com/hx-n/hxn-gpu-vulkan",
   "license": "Apache",
   "tags": ["vulkan", "gpu", "haxe", "graphics", "compute", "spirv", "linux", "windows", "android", "native", "hxcpp", "hashlink", "cross"],
   "contributors": ["darmie", "rayzor"],
-  "releasenote": "Blend what a pipeline draws, write textures, and set the viewport and scissor inside a rendering.",
+  "releasenote": "Draw into several color targets in one pass, and test and write depth.",
   "dependencies": { "hxn": "0.3.9" }
 }

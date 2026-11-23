@@ -47,6 +47,13 @@ class CommandBuffer {
 	public function beginRendering(target:Image, load:LoadOp, red:Float, green:Float, blue:Float, alpha:Float):Void
 		HxnGpuVulkanNative.command_buffer_begin_rendering(hxnRaw, target == null ? null : target.hxnRaw, load, red, green, blue, alpha);
 
+	/**
+		Begins rendering into the attachments of `attachments`, each of which must be in its
+		attachment layout. Sets the viewport and scissor to the whole of them.
+	**/
+	public function beginRenderingWith(attachments:Attachments):Void
+		HxnGpuVulkanNative.command_buffer_begin_rendering_with(hxnRaw, attachments == null ? null : attachments.hxnRaw);
+
 	public function endRendering():Void
 		HxnGpuVulkanNative.command_buffer_end_rendering(hxnRaw);
 

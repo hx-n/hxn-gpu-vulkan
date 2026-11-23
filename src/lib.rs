@@ -315,6 +315,21 @@ pub struct Blend {
     pub alpha_destination: i32,
 }
 
+/// Each color target of a graphics pipeline has a format, and blends as the fields after
+/// `format` set, with the same codes as `Blend`.
+#[hxn::data]
+#[derive(Clone)]
+pub struct ColorTarget {
+    pub format: Format,
+    pub enabled: bool,
+    pub color_operation: i32,
+    pub color_source: i32,
+    pub color_destination: i32,
+    pub alpha_operation: i32,
+    pub alpha_source: i32,
+    pub alpha_destination: i32,
+}
+
 // Maps each shared factor code to its Vulkan factor, in the order of hxn-gpu's `BlendFactor`.
 const BLEND_FACTORS: [vk::BlendFactor; 11] = [
     vk::BlendFactor::ZERO,
@@ -921,6 +936,59 @@ impl Device {
         attributes: Vec<VertexAttribute>,
         blend: Blend,
     ) -> Result<Pipeline, String> {
+        let target = ColorTarget {
+            format,
+            enabled: blend.enabled,
+            color_operation: blend.color_operation,
+            color_source: blend.color_source,
+            color_destination: blend.color_destination,
+            alpha_operation: blend.alpha_operation,
+            alpha_source: blend.alpha_source,
+            alpha_destination: blend.alpha_destination,
+        };
+        self.create_graphics_pipeline_with(
+            vertex,
+            vertex_entry,
+            fragment,
+            fragment_entry,
+            layout,
+            vec![target],
+            false,
+            Format::D32Float,
+            1,
+            true,
+            topology,
+            bindings,
+            attributes,
+        )
+    }
+
+    /// Creates a graphics pipeline for dynamic rendering into the color attachments of
+    /// `targets`, in the order of the fragment shader's outputs. With `has_depth`, it tests
+    /// depth in an attachment of `depth`: the test passes when `compare` holds between a
+    /// fragment's depth and the attachment's, with `VkCompareOp`'s values from 0 `Never` to 7
+    /// `Always`, which hxn-gpu's drivers share, and with `write` a fragment that passes writes
+    /// its depth. The pipeline has a dynamic viewport and scissor, and does no culling.
+    #[allow(clippy::too_many_arguments)]
+    pub fn create_graphics_pipeline_with(
+        &self,
+        vertex: &ShaderModule,
+        vertex_entry: &str,
+        fragment: &ShaderModule,
+        fragment_entry: &str,
+        layout: &PipelineLayout,
+        targets: Vec<ColorTarget>,
+        has_depth: bool,
+        depth: Format,
+        compare: i32,
+        write: bool,
+        topology: Topology,
+        bindings: Vec<VertexBinding>,
+        attributes: Vec<VertexAttribute>,
+    ) -> Result<Pipeline, String> {
+        if !(0..=7).contains(&compare) {
+            return Err(format!("a compare function is 0 to 7, not {compare}"));
+        }
         let vertex_name =
             CString::new(vertex_entry).map_err(|_| "an entry point contains a NUL")?;
         let fragment_name =
@@ -975,38 +1043,24 @@ impl Device {
             .line_width(1.0);
         let multisample = vk::PipelineMultisampleStateCreateInfo::default()
             .rasterization_samples(vk::SampleCountFlags::TYPE_1);
-        let mut attachment = vk::PipelineColorBlendAttachmentState::default()
-            .color_write_mask(vk::ColorComponentFlags::RGBA);
-        if blend.enabled {
-            attachment = attachment
-                .blend_enable(true)
-                .color_blend_op(blend_operation(
-                    blend.color_operation,
-                    "the color operation",
-                )?)
-                .src_color_blend_factor(blend_factor(blend.color_source, "the color source")?)
-                .dst_color_blend_factor(blend_factor(
-                    blend.color_destination,
-                    "the color destination",
-                )?)
-                .alpha_blend_op(blend_operation(
-                    blend.alpha_operation,
-                    "the alpha operation",
-                )?)
-                .src_alpha_blend_factor(blend_factor(blend.alpha_source, "the alpha source")?)
-                .dst_alpha_blend_factor(blend_factor(
-                    blend.alpha_destination,
-                    "the alpha destination",
-                )?);
-        }
-        let blend_attachments = [attachment];
+        let blend_attachments = targets
+            .iter()
+            .map(blend_attachment)
+            .collect::<Result<Vec<_>, String>>()?;
         let blend =
             vk::PipelineColorBlendStateCreateInfo::default().attachments(&blend_attachments);
+        let depth_state = vk::PipelineDepthStencilStateCreateInfo::default()
+            .depth_test_enable(has_depth)
+            .depth_write_enable(has_depth && write)
+            .depth_compare_op(vk::CompareOp::from_raw(compare));
         let dynamic_states = [vk::DynamicState::VIEWPORT, vk::DynamicState::SCISSOR];
         let dynamic = vk::PipelineDynamicStateCreateInfo::default().dynamic_states(&dynamic_states);
-        let formats = [format.raw()];
+        let formats: Vec<vk::Format> = targets.iter().map(|t| t.format.raw()).collect();
         let mut rendering =
             vk::PipelineRenderingCreateInfoKHR::default().color_attachment_formats(&formats);
+        if has_depth {
+            rendering = rendering.depth_attachment_format(depth.raw());
+        }
         let info = vk::GraphicsPipelineCreateInfo::default()
             .stages(&stages)
             .vertex_input_state(&input)
@@ -1015,6 +1069,7 @@ impl Device {
             .rasterization_state(&raster)
             .multisample_state(&multisample)
             .color_blend_state(&blend)
+            .depth_stencil_state(&depth_state)
             .dynamic_state(&dynamic)
             .layout(layout.layout)
             .push_next(&mut rendering);
@@ -1131,6 +1186,23 @@ impl Device {
     }
 }
 
+// The blend state of one color attachment.
+fn blend_attachment(t: &ColorTarget) -> Result<vk::PipelineColorBlendAttachmentState, String> {
+    let mut attachment = vk::PipelineColorBlendAttachmentState::default()
+        .color_write_mask(vk::ColorComponentFlags::RGBA);
+    if t.enabled {
+        attachment = attachment
+            .blend_enable(true)
+            .color_blend_op(blend_operation(t.color_operation, "the color operation")?)
+            .src_color_blend_factor(blend_factor(t.color_source, "the color source")?)
+            .dst_color_blend_factor(blend_factor(t.color_destination, "the color destination")?)
+            .alpha_blend_op(blend_operation(t.alpha_operation, "the alpha operation")?)
+            .src_alpha_blend_factor(blend_factor(t.alpha_source, "the alpha source")?)
+            .dst_alpha_blend_factor(blend_factor(t.alpha_destination, "the alpha destination")?);
+    }
+    Ok(attachment)
+}
+
 fn aspect_of(format: Format) -> vk::ImageAspectFlags {
     match format {
         Format::D32Float => vk::ImageAspectFlags::DEPTH,
@@ -1214,6 +1286,60 @@ impl Drop for Buffer {
 }
 
 /// A 2D image in device memory, with one view of all of it.
+/// `Attachments` collects the attachments of a rendering: color attachments in order, and an
+/// optional depth attachment. `CommandBuffer.begin_rendering_with` begins it.
+#[hxn::interface]
+pub struct Attachments {
+    colors: Vec<(vk::ImageView, LoadOp, [f32; 4])>,
+    depth: Option<(vk::ImageView, LoadOp, f32)>,
+    extent: vk::Extent2D,
+}
+
+#[hxn::methods]
+impl Attachments {
+    pub fn create() -> Attachments {
+        Attachments {
+            colors: Vec::new(),
+            depth: None,
+            extent: vk::Extent2D {
+                width: 0,
+                height: 0,
+            },
+        }
+    }
+
+    /// Adds the next color attachment, `target`, which `load` starts from: the image as it is,
+    /// cleared to `red`, `green`, `blue`, `alpha`, or undefined.
+    #[allow(clippy::too_many_arguments)]
+    pub fn color(
+        &mut self,
+        target: &Image,
+        load: LoadOp,
+        red: f64,
+        green: f64,
+        blue: f64,
+        alpha: f64,
+    ) {
+        if self.colors.is_empty() {
+            self.extent = vk::Extent2D {
+                width: target.width,
+                height: target.height,
+            };
+        }
+        self.colors.push((
+            target.view,
+            load,
+            [red as f32, green as f32, blue as f32, alpha as f32],
+        ));
+    }
+
+    /// Sets the depth attachment, `target`, which `load` starts from: the image as it is,
+    /// cleared to `clear`, or undefined.
+    pub fn depth(&mut self, target: &Image, load: LoadOp, clear: f64) {
+        self.depth = Some((target.view, load, clear as f32));
+    }
+}
+
 #[hxn::interface]
 pub struct Image {
     shared: Arc<DeviceShared>,
@@ -1928,6 +2054,71 @@ impl CommandBuffer {
                     y: 0.0,
                     width: extent.width as f32,
                     height: extent.height as f32,
+                    min_depth: 0.0,
+                    max_depth: 1.0,
+                }],
+            );
+            shared.device.cmd_set_scissor(cb, 0, &[area]);
+        }
+        Ok(())
+    }
+
+    /// Begins rendering into the attachments of `attachments`, each of which must be in its
+    /// attachment layout. Sets the viewport and scissor to the whole of them.
+    pub fn begin_rendering_with(&mut self, attachments: &mut Attachments) -> Result<(), String> {
+        let cb = self.recording()?;
+        if attachments.colors.is_empty() {
+            return Err("rendering needs at least one color attachment".into());
+        }
+        let colors: Vec<vk::RenderingAttachmentInfoKHR> = attachments
+            .colors
+            .iter()
+            .map(|(view, load, rgba)| {
+                vk::RenderingAttachmentInfoKHR::default()
+                    .image_view(*view)
+                    .image_layout(vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL)
+                    .load_op(vk::AttachmentLoadOp::from_raw(*load as i32))
+                    .store_op(vk::AttachmentStoreOp::STORE)
+                    .clear_value(vk::ClearValue {
+                        color: vk::ClearColorValue { float32: *rgba },
+                    })
+            })
+            .collect();
+        let depth = attachments.depth.map(|(view, load, clear)| {
+            vk::RenderingAttachmentInfoKHR::default()
+                .image_view(view)
+                .image_layout(vk::ImageLayout::DEPTH_ATTACHMENT_OPTIMAL)
+                .load_op(vk::AttachmentLoadOp::from_raw(load as i32))
+                .store_op(vk::AttachmentStoreOp::STORE)
+                .clear_value(vk::ClearValue {
+                    depth_stencil: vk::ClearDepthStencilValue {
+                        depth: clear,
+                        stencil: 0,
+                    },
+                })
+        });
+        let area = vk::Rect2D {
+            offset: vk::Offset2D { x: 0, y: 0 },
+            extent: attachments.extent,
+        };
+        let mut info = vk::RenderingInfoKHR::default()
+            .render_area(area)
+            .layer_count(1)
+            .color_attachments(&colors);
+        if let Some(depth) = depth.as_ref() {
+            info = info.depth_attachment(depth);
+        }
+        let shared = &self.recorded.shared;
+        unsafe {
+            shared.rendering.cmd_begin_rendering(cb, &info);
+            shared.device.cmd_set_viewport(
+                cb,
+                0,
+                &[vk::Viewport {
+                    x: 0.0,
+                    y: 0.0,
+                    width: area.extent.width as f32,
+                    height: area.extent.height as f32,
                     min_depth: 0.0,
                     max_depth: 1.0,
                 }],

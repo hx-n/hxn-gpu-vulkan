@@ -139,6 +139,15 @@ inline void *device_create_graphics_pipeline(void *self, void *vertex, ::String 
 	return out;
 }
 
+inline void *device_create_graphics_pipeline_with(void *self, void *vertex, ::String vertex_entry, void *fragment, ::String fragment_entry, void *layout, Array<unsigned char> targets, bool has_depth, int depth, int compare, bool write, int topology, Array<unsigned char> bindings, Array<unsigned char> attributes) {
+	hx::strbuf vertex_entry_storage;
+	hx::strbuf fragment_entry_storage;
+	hxn_handle *out = 0;
+	hxn_buf err = HXN_BUF_EMPTY;
+	hxn::check(hxn_gpu_vulkan_device_create_graphics_pipeline_with((hxn_handle *)self, (hxn_handle *)vertex, hxn::slice(vertex_entry, vertex_entry_storage), (hxn_handle *)fragment, hxn::slice(fragment_entry, fragment_entry_storage), (hxn_handle *)layout, hxn::slice(targets), has_depth ? 1 : 0, depth, compare, write ? 1 : 0, topology, hxn::slice(bindings), hxn::slice(attributes), &out, &err), err);
+	return out;
+}
+
 inline void *device_create_command_buffer(void *self) {
 	hxn_handle *out = 0;
 	hxn_buf err = HXN_BUF_EMPTY;
@@ -197,6 +206,28 @@ inline Array<unsigned char> buffer_read(void *self, cpp::Int64 offset, cpp::Int6
 inline void buffer_drop(void *self) {
 	hxn_buf err = HXN_BUF_EMPTY;
 	hxn::check(hxn_gpu_vulkan_buffer_drop((hxn_handle *)self, &err), err);
+}
+
+inline void *attachments_create() {
+	hxn_handle *out = 0;
+	hxn_buf err = HXN_BUF_EMPTY;
+	hxn::check(hxn_gpu_vulkan_attachments_create(&out, &err), err);
+	return out;
+}
+
+inline void attachments_color(void *self, void *target, int load, double red, double green, double blue, double alpha) {
+	hxn_buf err = HXN_BUF_EMPTY;
+	hxn::check(hxn_gpu_vulkan_attachments_color((hxn_handle *)self, (hxn_handle *)target, load, red, green, blue, alpha, &err), err);
+}
+
+inline void attachments_depth(void *self, void *target, int load, double clear) {
+	hxn_buf err = HXN_BUF_EMPTY;
+	hxn::check(hxn_gpu_vulkan_attachments_depth((hxn_handle *)self, (hxn_handle *)target, load, clear, &err), err);
+}
+
+inline void attachments_drop(void *self) {
+	hxn_buf err = HXN_BUF_EMPTY;
+	hxn::check(hxn_gpu_vulkan_attachments_drop((hxn_handle *)self, &err), err);
 }
 
 inline int image_width(void *self) {
@@ -356,6 +387,11 @@ inline void command_buffer_memory_barrier(void *self, int src_stages, int src_ac
 inline void command_buffer_begin_rendering(void *self, void *target, int load, double red, double green, double blue, double alpha) {
 	hxn_buf err = HXN_BUF_EMPTY;
 	hxn::check(hxn_gpu_vulkan_command_buffer_begin_rendering((hxn_handle *)self, (hxn_handle *)target, load, red, green, blue, alpha, &err), err);
+}
+
+inline void command_buffer_begin_rendering_with(void *self, void *attachments) {
+	hxn_buf err = HXN_BUF_EMPTY;
+	hxn::check(hxn_gpu_vulkan_command_buffer_begin_rendering_with((hxn_handle *)self, (hxn_handle *)attachments, &err), err);
 }
 
 inline void command_buffer_end_rendering(void *self) {

@@ -121,6 +121,20 @@
         { "name": "alpha_source", "type": "i32" },
         { "name": "alpha_destination", "type": "i32" }
       ]
+    },
+    {
+      "name": "ColorTarget",
+      "docs": "Each color target of a graphics pipeline has a format, and blends as the fields after\n`format` set, with the same codes as `Blend`.",
+      "fields": [
+        { "name": "format", "type": "Format" },
+        { "name": "enabled", "type": "bool" },
+        { "name": "color_operation", "type": "i32" },
+        { "name": "color_source", "type": "i32" },
+        { "name": "color_destination", "type": "i32" },
+        { "name": "alpha_operation", "type": "i32" },
+        { "name": "alpha_source", "type": "i32" },
+        { "name": "alpha_destination", "type": "i32" }
+      ]
     }
   ],
   "interfaces": [
@@ -265,6 +279,15 @@
           "blocking": false
         },
         {
+          "name": "create_graphics_pipeline_with",
+          "docs": "Creates a graphics pipeline for dynamic rendering into the color attachments of\n`targets`, in the order of the fragment shader's outputs. With `has_depth`, it tests\ndepth in an attachment of `depth`: the test passes when `compare` holds between a\nfragment's depth and the attachment's, with `VkCompareOp`'s values from 0 `Never` to 7\n`Always`, which hxn-gpu's drivers share, and with `write` a fragment that passes writes\nits depth. The pipeline has a dynamic viewport and scissor, and does no culling.",
+          "kind": "method",
+          "params": [{ "name": "vertex", "type": "ShaderModule" }, { "name": "vertex_entry", "type": "str" }, { "name": "fragment", "type": "ShaderModule" }, { "name": "fragment_entry", "type": "str" }, { "name": "layout", "type": "PipelineLayout" }, { "name": "targets", "type": "list<ColorTarget>" }, { "name": "has_depth", "type": "bool" }, { "name": "depth", "type": "Format" }, { "name": "compare", "type": "i32" }, { "name": "write", "type": "bool" }, { "name": "topology", "type": "Topology" }, { "name": "bindings", "type": "list<VertexBinding>" }, { "name": "attributes", "type": "list<VertexAttribute>" }],
+          "returns": "Pipeline",
+          "fallible": true,
+          "blocking": false
+        },
+        {
           "name": "create_command_buffer",
           "docs": "A primary command buffer, from a pool of its own, ready to record.",
           "kind": "method",
@@ -335,8 +358,39 @@
       ]
     },
     {
+      "name": "Attachments",
+      "docs": "A 2D image in device memory, with one view of all of it.\n`Attachments` collects the attachments of a rendering: color attachments in order, and an\noptional depth attachment. `CommandBuffer.begin_rendering_with` begins it.",
+      "methods": [
+        {
+          "name": "create",
+          "kind": "static",
+          "params": [],
+          "returns": "Attachments",
+          "fallible": false,
+          "blocking": false
+        },
+        {
+          "name": "color",
+          "docs": "Adds the next color attachment, `target`, which `load` starts from: the image as it is,\ncleared to `red`, `green`, `blue`, `alpha`, or undefined.",
+          "kind": "mutating",
+          "params": [{ "name": "target", "type": "Image" }, { "name": "load", "type": "LoadOp" }, { "name": "red", "type": "f64" }, { "name": "green", "type": "f64" }, { "name": "blue", "type": "f64" }, { "name": "alpha", "type": "f64" }],
+          "returns": "void",
+          "fallible": false,
+          "blocking": false
+        },
+        {
+          "name": "depth",
+          "docs": "Sets the depth attachment, `target`, which `load` starts from: the image as it is,\ncleared to `clear`, or undefined.",
+          "kind": "mutating",
+          "params": [{ "name": "target", "type": "Image" }, { "name": "load", "type": "LoadOp" }, { "name": "clear", "type": "f64" }],
+          "returns": "void",
+          "fallible": false,
+          "blocking": false
+        }
+      ]
+    },
+    {
       "name": "Image",
-      "docs": "A 2D image in device memory, with one view of all of it.",
       "methods": [
         {
           "name": "width",
@@ -530,6 +584,15 @@
           "docs": "Begins rendering into `target`, which must be in the color attachment layout, starting\nfrom it as it is, cleared to `red`, `green`, `blue`, `alpha`, or undefined. Sets the\nviewport and scissor to all of it.",
           "kind": "mutating",
           "params": [{ "name": "target", "type": "Image" }, { "name": "load", "type": "LoadOp" }, { "name": "red", "type": "f64" }, { "name": "green", "type": "f64" }, { "name": "blue", "type": "f64" }, { "name": "alpha", "type": "f64" }],
+          "returns": "void",
+          "fallible": true,
+          "blocking": false
+        },
+        {
+          "name": "begin_rendering_with",
+          "docs": "Begins rendering into the attachments of `attachments`, each of which must be in its\nattachment layout. Sets the viewport and scissor to the whole of them.",
+          "kind": "mutating",
+          "params": [{ "name": "attachments", "type": "Attachments", "borrow": "exclusive" }],
           "returns": "void",
           "fallible": true,
           "blocking": false

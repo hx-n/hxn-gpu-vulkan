@@ -1,6 +1,6 @@
 [package]
 name = "hxn-gpu-vulkan"
-version = "0.3.2"
+version = "0.3.3"
 edition = "2024"
 description = "Vulkan for Haxe: devices, buffers, images, descriptor sets, pipelines and command buffers with explicit barriers"
 repository = "https://github.com/hx-n/hxn-gpu-vulkan"
@@ -15,7 +15,7 @@ name = "hxn_gpu_vulkan"
 library = "gpu_vulkan"
 haxelib = "hxn-gpu-vulkan"
 contributors = ["darmie", "rayzor"]
-releasenote = "Blend what a pipeline draws, write textures, and set the viewport and scissor inside a rendering."
+releasenote = "Draw into several color targets in one pass, and test and write depth."
 # The check `hxn check` and `hxn run` build.
 haxe = "examples/check"
 haxe-flags = ["-lib", "hxnsl"]

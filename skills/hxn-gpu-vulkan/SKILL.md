@@ -68,6 +68,11 @@ Inside a rendering, `setViewport(x, y, w, h)` and `setScissor(x, y, w, h)` take
 pixels from the image's top-left corner, and `LoadOp.Load` keeps what the image
 holds. `copyBufferToImage(buffer, image, x, y, w, h, rowLength)` writes part of an
 image in `Layout.TransferDst`, from rows `rowLength` pixels apart, or packed with 0.
+Several targets and depth: `device.createGraphicsPipelineWith(..., targets, hasDepth,
+depthFormat, compare, write, topology, bindings, attributes)` takes `ColorTarget` records
+and compare codes 0 `Never` to 7 `Always`. `Attachments.create()` with
+`color(image, load, r, g, b, a)` and `depth(image, load, clear)` feeds
+`commands.beginRenderingWith(attachments)`; a depth image is in `Layout.DepthAttachment`.
 
 ## Windows
 
