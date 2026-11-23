@@ -75,7 +75,7 @@ class Main {
 		});
 	}
 
-	// Blending is off: the quad's color replaces the target's.
+	// Blending is off, so the quad's color replaces the target's.
 	static final REPLACE:Blend = {
 		enabled: false,
 		colorOperation: 0,
@@ -86,9 +86,9 @@ class Main {
 		alphaDestination: 0
 	};
 
-	// Straight alpha: color = source * source alpha + destination * (1 - source alpha),
-	// and alpha = source + destination * (1 - source alpha). The shared factor codes 4
-	// (SrcAlpha), 5 (OneMinusSrcAlpha) and 1 (One), and the operation 0 (Add).
+	// Straight alpha blends with color = source * source alpha + destination * (1 - source
+	// alpha) and alpha = source + destination * (1 - source alpha). It uses the shared factor
+	// codes 4 (SrcAlpha), 5 (OneMinusSrcAlpha) and 1 (One), and the operation 0 (Add).
 	static final ALPHA:Blend = {
 		enabled: true,
 		colorOperation: 0,
@@ -107,7 +107,8 @@ class Main {
 			for (c in 0...4)
 				check(pixels.get(p * 4 + c) == expected[c], 'pixel $p channel $c is ${pixels.get(p * 4 + c)}, not ${expected[c]}');
 		Sys.println('render: 4x4 pixels of ${[for (c in 0...4) pixels.get(c)].join(", ")}');
-		// A half-transparent red quad over a blue target: half red, half blue, opaque.
+		// The check draws a half-transparent red quad over a blue target. The result is half
+		// red, half blue and opaque.
 		var blended = quad(device, [1.0, 0.0, 0.0, 0.5], [0.0, 0.0, 1.0, 1.0], ALPHA);
 		var mixed = [128, 0, 128, 255];
 		for (p in 0...16)

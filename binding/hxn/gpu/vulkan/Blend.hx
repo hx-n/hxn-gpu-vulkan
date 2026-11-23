@@ -2,10 +2,10 @@
 package hxn.gpu.vulkan;
 
 /**
-	How a pipeline blends what it draws into its color attachment. The factors are hxn-gpu's
-	shared codes, from 0 `Zero` to 10 `SrcAlphaSaturated`, and the operations from 0 `Add` to
-	4 `Max`, as `VkBlendOp` numbers them. With `enabled` false, the pipeline writes its color
-	as it is.
+	`Blend` sets how a pipeline blends what it draws into its color attachment. The factors are
+	hxn-gpu's shared codes, from 0 `Zero` to 10 `SrcAlphaSaturated`. The operations are the codes
+	from 0 `Add` to 4 `Max`, which `VkBlendOp` uses too. When `enabled` is false, the pipeline
+	writes its color as it is.
 **/
 @:structInit class Blend {
 	public var enabled:Bool;

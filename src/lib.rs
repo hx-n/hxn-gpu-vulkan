@@ -300,10 +300,10 @@ pub enum AddressMode {
     ClampToEdge = 2,
 }
 
-/// How a pipeline blends what it draws into its color attachment. The factors are hxn-gpu's
-/// shared codes, from 0 `Zero` to 10 `SrcAlphaSaturated`, and the operations from 0 `Add` to
-/// 4 `Max`, as `VkBlendOp` numbers them. With `enabled` false, the pipeline writes its color
-/// as it is.
+/// `Blend` sets how a pipeline blends what it draws into its color attachment. The factors are
+/// hxn-gpu's shared codes, from 0 `Zero` to 10 `SrcAlphaSaturated`. The operations are the codes
+/// from 0 `Add` to 4 `Max`, which `VkBlendOp` uses too. When `enabled` is false, the pipeline
+/// writes its color as it is.
 #[hxn::data]
 pub struct Blend {
     pub enabled: bool,
@@ -315,7 +315,7 @@ pub struct Blend {
     pub alpha_destination: i32,
 }
 
-// The Vulkan factor of each shared code, in the order of hxn-gpu's `BlendFactor`.
+// Maps each shared factor code to its Vulkan factor, in the order of hxn-gpu's `BlendFactor`.
 const BLEND_FACTORS: [vk::BlendFactor; 11] = [
     vk::BlendFactor::ZERO,
     vk::BlendFactor::ONE,
@@ -904,8 +904,9 @@ impl Device {
         })
     }
 
-    /// A graphics pipeline for dynamic rendering into one color attachment of `format`, with a
-    /// dynamic viewport and scissor, blending as `blend` describes, and no culling.
+    /// Creates a graphics pipeline for dynamic rendering into one color attachment of `format`.
+    /// The pipeline has a dynamic viewport and scissor, blends as `blend` describes, and does no
+    /// culling.
     #[allow(clippy::too_many_arguments)]
     pub fn create_graphics_pipeline(
         &self,

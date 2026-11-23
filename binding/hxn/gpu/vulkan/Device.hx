@@ -67,8 +67,9 @@ class Device {
 		return Pipeline.hxnAdopt(HxnGpuVulkanNative.device_create_compute_pipeline(hxnRaw, module == null ? null : module.hxnRaw, entry, layout == null ? null : layout.hxnRaw));
 
 	/**
-		A graphics pipeline for dynamic rendering into one color attachment of `format`, with a
-		dynamic viewport and scissor, blending as `blend` describes, and no culling.
+		Creates a graphics pipeline for dynamic rendering into one color attachment of `format`.
+		The pipeline has a dynamic viewport and scissor, blends as `blend` describes, and does no
+		culling.
 	**/
 	public function createGraphicsPipeline(vertex:ShaderModule, vertexEntry:String, fragment:ShaderModule, fragmentEntry:String, layout:PipelineLayout, format:Format, topology:Topology, bindings:Array<VertexBinding>, attributes:Array<VertexAttribute>, blend:Blend):Pipeline {
 		var bindingsOut = new haxe.io.BytesBuffer();

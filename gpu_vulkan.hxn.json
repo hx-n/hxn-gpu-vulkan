@@ -111,7 +111,7 @@
     },
     {
       "name": "Blend",
-      "docs": "How a pipeline blends what it draws into its color attachment. The factors are hxn-gpu's\nshared codes, from 0 `Zero` to 10 `SrcAlphaSaturated`, and the operations from 0 `Add` to\n4 `Max`, as `VkBlendOp` numbers them. With `enabled` false, the pipeline writes its color\nas it is.",
+      "docs": "`Blend` sets how a pipeline blends what it draws into its color attachment. The factors are\nhxn-gpu's shared codes, from 0 `Zero` to 10 `SrcAlphaSaturated`. The operations are the codes\nfrom 0 `Add` to 4 `Max`, which `VkBlendOp` uses too. When `enabled` is false, the pipeline\nwrites its color as it is.",
       "fields": [
         { "name": "enabled", "type": "bool" },
         { "name": "color_operation", "type": "i32" },
@@ -257,7 +257,7 @@
         },
         {
           "name": "create_graphics_pipeline",
-          "docs": "A graphics pipeline for dynamic rendering into one color attachment of `format`, with a\ndynamic viewport and scissor, blending as `blend` describes, and no culling.",
+          "docs": "Creates a graphics pipeline for dynamic rendering into one color attachment of `format`.\nThe pipeline has a dynamic viewport and scissor, blends as `blend` describes, and does no\nculling.",
           "kind": "method",
           "params": [{ "name": "vertex", "type": "ShaderModule" }, { "name": "vertex_entry", "type": "str" }, { "name": "fragment", "type": "ShaderModule" }, { "name": "fragment_entry", "type": "str" }, { "name": "layout", "type": "PipelineLayout" }, { "name": "format", "type": "Format" }, { "name": "topology", "type": "Topology" }, { "name": "bindings", "type": "list<VertexBinding>" }, { "name": "attributes", "type": "list<VertexAttribute>" }, { "name": "blend", "type": "Blend" }],
           "returns": "Pipeline",
