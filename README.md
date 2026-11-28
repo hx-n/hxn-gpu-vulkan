@@ -83,7 +83,9 @@ exceptions.
 
 `Instance.createSurface` takes [hxn-window](https://github.com/hx-n/hxn-window)'s
 `platform()` and `raw(0)` to `raw(3)`, on AppKit and UIKit (through MoltenVK),
-Win32, Xlib, Wayland and Android. `Device.createSwapchain(surface, width, height,
+Win32, Xlib, Wayland and Android. `Device.surfaceFormat(surface)` returns
+`Format.Bgra8Unorm` or `Format.Rgba8Unorm`, whichever the surface offers.
+Android surfaces offer RGBA only. `Device.createSwapchain(surface, width, height,
 format, vsync)` makes the images to present. Each frame, `acquire` waits for the
 next image, a render pass draws into it, a barrier moves it to `Layout.Present`,
 and `present` shows it once the work submitted before has finished. `present`
@@ -94,7 +96,7 @@ high-density display can be larger than the size asked for: read it from
 
 ```haxe
 var surface = instance.createSurface(window.platform(), window.raw(0), window.raw(1), window.raw(2), window.raw(3));
-var swapchain = device.createSwapchain(surface, 640, 480, Format.Bgra8Unorm, true);
+var swapchain = device.createSwapchain(surface, 640, 480, device.surfaceFormat(surface), true);
 var image = swapchain.acquire();
 commands.imageBarrier(image, Stage.TopOfPipe, 0, Layout.Undefined, Stage.ColorAttachmentOutput, Access.ColorAttachmentWrite, Layout.ColorAttachment);
 commands.beginRendering(image, LoadOp.Clear, 0, 0, 0, 1);

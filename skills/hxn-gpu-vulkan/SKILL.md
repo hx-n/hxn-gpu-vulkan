@@ -77,7 +77,8 @@ and compare codes 0 `Never` to 7 `Always`. `Attachments.create()` with
 ## Windows
 
 `instance.createSurface(window.platform(), window.raw(0), window.raw(1), window.raw(2), window.raw(3))`
-with an hxn-window window, then `device.createSwapchain(surface, w, h, Format.Bgra8Unorm, vsync)`.
+with an hxn-window window, then `device.createSwapchain(surface, w, h, device.surfaceFormat(surface), vsync)`.
+`surfaceFormat` returns BGRA8 or RGBA8, whichever the surface offers. Android offers RGBA only.
 Each frame: `var image = swapchain.acquire()`, render into it, barrier it to
 `Layout.Present`, submit, then `if (!swapchain.present()) swapchain.resize(w, h)`.
 The images take the window's size in pixels: read `swapchain.width()`.
