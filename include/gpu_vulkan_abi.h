@@ -32,6 +32,7 @@ hxn_status hxn_gpu_vulkan_device_create_graphics_pipeline(hxn_handle *self, hxn_
 hxn_status hxn_gpu_vulkan_device_create_graphics_pipeline_with(hxn_handle *self, hxn_handle *vertex, hxn_slice vertex_entry, hxn_handle *fragment, hxn_slice fragment_entry, hxn_handle *layout, hxn_slice targets, int32_t has_depth, int32_t depth, int32_t compare, int32_t write, int32_t topology, hxn_slice bindings, hxn_slice attributes, hxn_handle **out, hxn_buf *err);
 hxn_status hxn_gpu_vulkan_device_create_command_buffer(hxn_handle *self, hxn_handle **out, hxn_buf *err);
 hxn_status hxn_gpu_vulkan_device_create_swapchain(hxn_handle *self, hxn_handle *surface, int32_t width, int32_t height, int32_t format, int32_t vsync, hxn_handle **out, hxn_buf *err);
+hxn_status hxn_gpu_vulkan_device_surface_format(hxn_handle *self, hxn_handle *surface, int32_t *out, hxn_buf *err);
 hxn_status hxn_gpu_vulkan_device_submit_and_wait(hxn_handle *self, hxn_handle *commands, hxn_buf *err);
 hxn_status hxn_gpu_vulkan_device_submit(hxn_handle *self, hxn_handle *commands, hxn_handle **out, hxn_buf *err);
 hxn_status hxn_gpu_vulkan_device_drop(hxn_handle *self, hxn_buf *err);

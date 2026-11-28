@@ -306,6 +306,15 @@
           "blocking": false
         },
         {
+          "name": "surface_format",
+          "docs": "The format that frames on `surface` present best: 8-bit BGRA or RGBA without sRGB\nencoding, whichever the window offers, BGRA first.",
+          "kind": "method",
+          "params": [{ "name": "surface", "type": "Surface" }],
+          "returns": "Format",
+          "fallible": true,
+          "blocking": false
+        },
+        {
           "name": "submit_and_wait",
           "docs": "Submits `commands`, ending it first, and waits for the GPU to finish them.",
           "kind": "method",

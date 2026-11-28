@@ -162,6 +162,13 @@ inline void *device_create_swapchain(void *self, void *surface, int width, int h
 	return out;
 }
 
+inline int device_surface_format(void *self, void *surface) {
+	int out = 0;
+	hxn_buf err = HXN_BUF_EMPTY;
+	hxn::check(hxn_gpu_vulkan_device_surface_format((hxn_handle *)self, (hxn_handle *)surface, &out, &err), err);
+	return out;
+}
+
 inline void device_submit_and_wait(void *self, void *commands) {
 	hxn_buf err = HXN_BUF_EMPTY;
 	hxn_status status;

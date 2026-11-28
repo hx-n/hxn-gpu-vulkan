@@ -1137,6 +1137,27 @@ impl Device {
         self.swapchain_of(surface, width, height, format, vsync)
     }
 
+    /// The format that frames on `surface` present best: 8-bit BGRA or RGBA without sRGB
+    /// encoding, whichever the window offers, BGRA first.
+    pub fn surface_format(&self, surface: &Surface) -> Result<Format, String> {
+        let shared = &surface.shared;
+        let formats = unsafe {
+            shared
+                .loader
+                .get_physical_device_surface_formats(self.shared.physical, shared.surface)
+        }
+        .map_err(|e| failed("listing the window's formats", e))?;
+        [Format::Bgra8Unorm, Format::Rgba8Unorm]
+            .into_iter()
+            .find(|wanted| formats.iter().any(|f| f.format == wanted.raw()))
+            .ok_or_else(|| {
+                format!(
+                    "the window has no 8-bit BGRA or RGBA format; it has {:?}",
+                    formats.iter().map(|f| f.format).collect::<Vec<_>>()
+                )
+            })
+    }
+
     /// Submits `commands`, ending it first, and waits for the GPU to finish them.
     #[hxn(blocking)]
     pub fn submit_and_wait(&self, commands: &mut CommandBuffer) -> Result<(), String> {

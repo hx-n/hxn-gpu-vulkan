@@ -153,6 +153,13 @@ class Device {
 	public function createSwapchain(surface:Surface, width:Int, height:Int, format:Format, vsync:Bool):Swapchain
 		return Swapchain.hxnAdopt(HxnGpuVulkanNative.device_create_swapchain(hxnRaw, surface == null ? null : surface.hxnRaw, width, height, format, vsync));
 
+	/**
+		The format that frames on `surface` present best: 8-bit BGRA or RGBA without sRGB
+		encoding, whichever the window offers, BGRA first.
+	**/
+	public function surfaceFormat(surface:Surface):Format
+		return HxnGpuVulkanNative.device_surface_format(hxnRaw, surface == null ? null : surface.hxnRaw);
+
 	/** Submits `commands`, ending it first, and waits for the GPU to finish them. **/
 	public function submitAndWait(commands:CommandBuffer):Void
 		HxnGpuVulkanNative.device_submit_and_wait(hxnRaw, commands == null ? null : commands.hxnRaw);
